@@ -1,0 +1,183 @@
+<div class="catalog-page">
+  <!-- Header Banner -->
+  <div class="catalog-header" [class.is-sale-banner]="onlyOnSale()">
+    <div class="container">
+      @if (onlyOnSale()) {
+        <span class="section-tag">Promociones Especiales</span>
+        <h1 class="catalog-title">
+          Sale & Descuentos
+          @if (selectedGender() === 'Mujer') {
+            — Mujer
+          } @else if (selectedGender() === 'Hombre') {
+            — Hombre
+          }
+        </h1>
+        <p class="catalog-subtitle">
+          Explora todas nuestras piezas seleccionadas con precios de descuento exclusivos.
+        </p>
+      } @else {
+        <span class="section-tag">
+          Colección {{ selectedGender() === 'all' ? 'Completa' : selectedGender() }}
+        </span>
+        <h1 class="catalog-title">
+          Colección {{ selectedGender() === 'all' ? 'Moutii' : selectedGender() }}
+        </h1>
+        <p class="catalog-subtitle">
+          @if (selectedGender() === 'Hombre') {
+            Sastrería masculina contemporánea, lino orgánico y prendas esenciales de diseño exclusivo.
+          } @else if (selectedGender() === 'Mujer') {
+            Siluetas holgadas, vestidos de lino y sastrería atemporal de diseño exclusivo.
+          } @else {
+            Prendas de autor con alma atemporal, siluetas limpias y confección noble para él y para ella.
+          }
+        </p>
+      }
+    </div>
+  </div>
+
+  <div class="container catalog-body">
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <div class="filter-main-sections">
+        <!-- Gender Filter Switcher -->
+        <div class="filter-group gender-filter-group">
+          <span class="filter-label">Sección:</span>
+          <div class="pills-row">
+            <button
+              type="button"
+              class="pill-btn gender-pill"
+              [class.active]="selectedGender() === 'all'"
+              (click)="setGender('all')"
+            >
+              Todos
+            </button>
+            <button
+              type="button"
+              class="pill-btn gender-pill"
+              [class.active]="selectedGender() === 'Mujer'"
+              (click)="setGender('Mujer')"
+            >
+              Mujer
+            </button>
+            <button
+              type="button"
+              class="pill-btn gender-pill"
+              [class.active]="selectedGender() === 'Hombre'"
+              (click)="setGender('Hombre')"
+            >
+              Hombre
+            </button>
+          </div>
+        </div>
+
+        <div class="filter-sep"></div>
+
+        <!-- Category Pills -->
+        <div class="filter-group category-filter-group">
+          <span class="filter-label">Categoría:</span>
+          <div class="pills-row">
+            <button
+              class="pill-btn"
+              [class.active]="selectedCategory() === 'all'"
+              (click)="setCategory('all')"
+            >
+              Todas ({{ totalCount() }})
+            </button>
+            @for (cat of categories(); track cat) {
+              <button
+                class="pill-btn"
+                [class.active]="selectedCategory() === cat"
+                (click)="setCategory(cat)"
+              >
+                {{ cat }}
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Secondary Controls: Search, OnSale, Sorting -->
+      <div class="filter-controls">
+        @if (!onlyOnSale()) {
+          <label class="toggle-control">
+            <input
+              type="checkbox"
+              [checked]="onlyOnSale()"
+              (change)="toggleOnSale()"
+            />
+            <span class="toggle-label">Solo Descuentos</span>
+          </label>
+        } @else {
+          <span class="sale-mode-badge">🔥 Modo Sale Activo</span>
+        }
+
+        <!-- Sorting selector -->
+        <div class="sort-wrapper">
+          <label for="sortSelect" class="sort-label">Ordenar:</label>
+          <select
+            id="sortSelect"
+            [(ngModel)]="currentSort"
+            (change)="applyFilters()"
+            class="sort-select"
+          >
+            <option value="newest">Más Recientes</option>
+            <option value="price_asc">Precio: Menor a Mayor</option>
+            <option value="price_desc">Precio: Mayor a Menor</option>
+            <option value="name">Nombre: A - Z</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Filter Tags -->
+    @if (searchQuery || onlyOnSale() || selectedCategory() !== 'all' || selectedGender() !== 'all') {
+      <div class="active-filters">
+        <span class="active-filter-label">Filtros aplicados:</span>
+        @if (selectedGender() !== 'all') {
+          <span class="filter-tag">
+            Sección: {{ selectedGender() }}
+            <button (click)="setGender('all')">&times;</button>
+          </span>
+        }
+        @if (selectedCategory() !== 'all') {
+          <span class="filter-tag">
+            Categoría: {{ selectedCategory() }}
+            <button (click)="setCategory('all')">&times;</button>
+          </span>
+        }
+        @if (onlyOnSale()) {
+          <span class="filter-tag">
+            Con descuento
+            <button (click)="toggleOnSale()">&times;</button>
+          </span>
+        }
+        @if (searchQuery) {
+          <span class="filter-tag">
+            Búsqueda: "{{ searchQuery }}"
+            <button (click)="clearSearch()">&times;</button>
+          </span>
+        }
+        <button class="clear-all-btn" (click)="resetFilters()">Limpiar filtros</button>
+      </div>
+    }
+
+    <!-- Products Grid -->
+    @if (loading()) {
+      <div class="loading-state text-center py-5">
+        <p>Cargando piezas de la colección...</p>
+      </div>
+    } @else if (products().length === 0) {
+      <div class="empty-state text-center">
+        <h3 class="empty-title">No encontramos prendas con estos filtros</h3>
+        <p class="empty-desc">Intenta seleccionando otra categoría o cambiando el género.</p>
+        <button class="btn btn-black btn-sm" (click)="resetFilters()">Ver Todas las Prendas</button>
+      </div>
+    } @else {
+      <div class="catalog-grid">
+        @for (prod of products(); track prod._id) {
+          <app-product-card [product]="prod"></app-product-card>
+        }
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,139 @@
+@if (cartService.isOpen()) {
+  <div class="drawer-overlay" (click)="cartService.closeCart()">
+    <div class="drawer-panel animate-slide-in" (click)="$event.stopPropagation()">
+      <!-- Header -->
+      <div class="drawer-header">
+        <div class="header-title-box">
+          <h3 class="drawer-title">Bolsa de Compras</h3>
+          <span class="items-count">({{ cartService.totalQuantity() }} piezas)</span>
+        </div>
+        <button class="close-btn" (click)="cartService.closeCart()" aria-label="Cerrar bolsa">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Items List -->
+      <div class="drawer-body">
+        @if (cartService.items().length === 0) {
+          <div class="empty-cart-state">
+            <div class="empty-icon-circle">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+              </svg>
+            </div>
+            <h4 class="empty-title">Tu bolsa está vacía</h4>
+            <p class="empty-text">Explora nuestra colección atemporal y descubre prendas en lino, café y beige.</p>
+            <button class="btn btn-black btn-sm" (click)="goToCatalog()">Explorar Catálogo</button>
+          </div>
+        } @else {
+          <div class="cart-items-list">
+            @for (item of cartService.items(); track item.id) {
+              <div class="cart-item">
+                <div class="item-img-box">
+                  <img [src]="item.product.images[0] || 'logo.png'" [alt]="item.product.title" class="item-img" />
+                </div>
+                <div class="item-details">
+                  <div class="item-head">
+                    <h4 class="item-title">{{ item.product.title }}</h4>
+                    <button class="remove-btn" (click)="cartService.removeItem(item.id)" title="Eliminar">
+                      &times;
+                    </button>
+                  </div>
+                  
+                  <div class="item-meta">
+                    @if (item.size) {
+                      <span class="meta-tag">Talla: <strong>{{ item.size }}</strong></span>
+                    }
+                    @if (item.color) {
+                      <span class="meta-tag">Color: <strong>{{ item.color }}</strong></span>
+                    }
+                  </div>
+
+                  <div class="item-foot">
+                    <div class="qty-control">
+                      <button class="qty-btn" (click)="cartService.updateQuantity(item.id, item.quantity - 1)">-</button>
+                      <span class="qty-number">{{ item.quantity }}</span>
+                      <button class="qty-btn" (click)="cartService.updateQuantity(item.id, item.quantity + 1)">+</button>
+                    </div>
+                    <div class="price-box">
+                      <span class="item-price">${{ (item.unitPrice * item.quantity) | number:'1.0-0' }} COP</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Footer & Summary -->
+      @if (cartService.items().length > 0) {
+        <div class="drawer-footer">
+          <!-- Coupon section -->
+          @if (cartService.couponCode()) {
+            <div class="applied-coupon-pill">
+              <div class="pill-info">
+                <span class="pill-badge">🎟️ {{ cartService.couponCode() }}</span>
+                <span class="pill-desc">{{ cartService.discountPercent() }}% OFF</span>
+              </div>
+              <button class="remove-coupon-btn" (click)="removeCoupon()" title="Quitar cupón">&times;</button>
+            </div>
+          } @else {
+            <div class="coupon-box">
+              <input
+                type="text"
+                [(ngModel)]="couponInput"
+                placeholder="Cupón de descuento (ej: MOUTII15)"
+                class="coupon-input"
+                (keyup.enter)="applyCoupon()"
+                [disabled]="isApplyingCoupon"
+              />
+              <button
+                class="btn btn-beige btn-sm coupon-btn"
+                (click)="applyCoupon()"
+                [disabled]="isApplyingCoupon"
+              >
+                {{ isApplyingCoupon ? '...' : 'Aplicar' }}
+              </button>
+            </div>
+          }
+          @if (couponMessage) {
+            <p [class]="couponSuccess ? 'coupon-success-msg' : 'coupon-error-msg'">
+              {{ couponMessage }}
+            </p>
+          }
+
+          <!-- Summary calculations -->
+          <div class="summary-line">
+            <span>Subtotal</span>
+            <span>${{ cartService.subtotal() | number:'1.0-0' }} COP</span>
+          </div>
+          @if (cartService.discountAmount() > 0) {
+            <div class="summary-line discount-line">
+              <span>Descuento ({{ cartService.discountPercent() }}%)</span>
+              <span>-${{ cartService.discountAmount() | number:'1.0-0' }} COP</span>
+            </div>
+          }
+          <div class="summary-line total-line">
+            <span>Total Estimado</span>
+            <span class="total-value">${{ cartService.total() | number:'1.0-0' }} COP</span>
+          </div>
+
+          <!-- Checkout action -->
+          <button class="btn btn-black btn-lg checkout-btn" (click)="proceedToCheckout()">
+            Finalizar Compra &rarr;
+          </button>
+          
+          <button class="clear-cart-link" (click)="cartService.clearCart()">
+            Vaciar bolsa
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+}

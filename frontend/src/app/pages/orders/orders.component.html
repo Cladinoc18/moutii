@@ -1,0 +1,274 @@
+<div class="orders-page">
+  <div class="container">
+    <!-- Breadcrumb & Navigation -->
+    <div class="orders-top-nav">
+      <a routerLink="/" class="back-link">&larr; Volver al Inicio</a>
+    </div>
+
+    <!-- Header Section -->
+    <div class="orders-header">
+      <span class="section-tag">Rastreo de Compras</span>
+      <h1 class="orders-title">Tus Pedidos</h1>
+      <p class="orders-subtitle">
+        Sigue el estado de preparación y entrega de tus prendas exclusivas en tiempo real.
+      </p>
+    </div>
+
+    <!-- Search / Tracker Input Bar -->
+    <div class="orders-search-card">
+      <form (ngSubmit)="searchOrder()" class="search-form">
+        <div class="search-input-group">
+          <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input
+            type="text"
+            [(ngModel)]="searchInput"
+            name="orderSearch"
+            placeholder="Ingresa tu número de orden (ej: MOU-202610-1234) o tu correo..."
+            class="search-input"
+          />
+          @if (searchInput) {
+            <button type="button" class="btn-clear-input" (click)="searchInput = ''; loadCustomerOrders()" title="Limpiar">
+              &times;
+            </button>
+          }
+        </div>
+        <button type="submit" class="btn btn-black btn-search" [disabled]="isLoading()">
+          {{ isLoading() ? 'Buscando...' : 'Rastrear Pedido' }}
+        </button>
+      </form>
+
+      @if (searchError()) {
+        <div class="search-error-banner animate-fade-in">
+          <span>⚠️ {{ searchError() }}</span>
+        </div>
+      }
+    </div>
+
+    <!-- Real-time Sync Bar -->
+    @if (orders().length > 0) {
+      <div class="sync-status-bar flex-between">
+        <div class="sync-indicator">
+          <span class="live-dot"></span>
+          <span class="sync-text">Sincronización en vivo con el taller y despacho</span>
+          <span class="sync-time">(Actualizado: {{ lastUpdated() | date:'shortTime' }})</span>
+        </div>
+        <button
+          type="button"
+          class="btn-refresh-status"
+          (click)="refreshOrders()"
+          [disabled]="isRefreshing()"
+          title="Consultar estado más reciente"
+        >
+          <svg
+            class="refresh-icon"
+            [class.spinning]="isRefreshing()"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M23 4v6h-6"></path>
+            <path d="M1 20v-6h6"></path>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+          {{ isRefreshing() ? 'Actualizando...' : 'Refrescar Estado' }}
+        </button>
+      </div>
+    }
+
+    <!-- Loading State -->
+    @if (isLoading()) {
+      <div class="loading-state text-center py-5">
+        <div class="spinner"></div>
+        <p>Consultando pedidos registrados...</p>
+      </div>
+    }
+
+    <!-- Orders List -->
+    @if (!isLoading() && orders().length > 0) {
+      <div class="orders-list">
+        @for (ord of orders(); track ord._id) {
+          <div class="order-card animate-fade-in">
+            <!-- Card Header -->
+            <div class="order-card-header flex-between">
+              <div class="order-identifiers">
+                <span class="order-number-tag">Orden #{{ ord.orderNumber }}</span>
+                <span class="order-date-text">Realizada el {{ ord.createdAt | date:'mediumDate' }}</span>
+              </div>
+              <div class="order-status-badge" [ngClass]="getStatusBadgeClass(ord.status)">
+                {{ ord.status }}
+              </div>
+            </div>
+
+            <!-- Status Message Banner -->
+            <div class="status-explanation-box">
+              <span class="status-exp-icon">ℹ️</span>
+              <p class="status-exp-text">{{ getStatusDescription(ord.status) }}</p>
+            </div>
+
+            <!-- Stepper Progress Tracker -->
+            @if (ord.status !== 'Cancelado') {
+              <div class="tracker-container">
+                <div class="tracker-steps">
+                  <!-- Step 1: Recibido -->
+                  <div class="tracker-step" [class.step-done]="getOrderStep(ord.status) >= 1" [class.step-active]="getOrderStep(ord.status) === 1">
+                    <div class="step-circle">
+                      <span class="step-check">✓</span>
+                      <span class="step-num">1</span>
+                    </div>
+                    <span class="step-label">Recibido</span>
+                  </div>
+
+                  <div class="step-line" [class.line-done]="getOrderStep(ord.status) >= 2"></div>
+
+                  <!-- Step 2: Pago Confirmado -->
+                  <div class="tracker-step" [class.step-done]="getOrderStep(ord.status) >= 2" [class.step-active]="getOrderStep(ord.status) === 2">
+                    <div class="step-circle">
+                      <span class="step-check">✓</span>
+                      <span class="step-num">2</span>
+                    </div>
+                    <span class="step-label">Pago Confirmado</span>
+                  </div>
+
+                  <div class="step-line" [class.line-done]="getOrderStep(ord.status) >= 3"></div>
+
+                  <!-- Step 3: En Preparación -->
+                  <div class="tracker-step" [class.step-done]="getOrderStep(ord.status) >= 3" [class.step-active]="getOrderStep(ord.status) === 3">
+                    <div class="step-circle">
+                      <span class="step-check">✓</span>
+                      <span class="step-num">3</span>
+                    </div>
+                    <span class="step-label">En Preparación</span>
+                  </div>
+
+                  <div class="step-line" [class.line-done]="getOrderStep(ord.status) >= 4"></div>
+
+                  <!-- Step 4: Enviado -->
+                  <div class="tracker-step" [class.step-done]="getOrderStep(ord.status) >= 4" [class.step-active]="getOrderStep(ord.status) === 4">
+                    <div class="step-circle">
+                      <span class="step-check">✓</span>
+                      <span class="step-num">4</span>
+                    </div>
+                    <span class="step-label">En Camino</span>
+                  </div>
+
+                  <div class="step-line" [class.line-done]="getOrderStep(ord.status) >= 5"></div>
+
+                  <!-- Step 5: Entregado -->
+                  <div class="tracker-step" [class.step-done]="getOrderStep(ord.status) >= 5" [class.step-active]="getOrderStep(ord.status) === 5">
+                    <div class="step-circle">
+                      <span class="step-check">✓</span>
+                      <span class="step-num">5</span>
+                    </div>
+                    <span class="step-label">Entregado</span>
+                  </div>
+                </div>
+              </div>
+            } @else {
+              <div class="cancelled-alert">
+                <span>✕ Este pedido ha sido cancelado. Si tienes dudas respecto al pago o despacho, contáctanos vía WhatsApp.</span>
+              </div>
+            }
+
+            <!-- Items Purchased Breakdown -->
+            <div class="order-items-section">
+              <h4 class="items-title">Prendas en esta orden ({{ ord.items.length }})</h4>
+              <div class="items-grid">
+                @for (item of ord.items; track item.productId) {
+                  <div class="item-row">
+                    <div class="item-img-box">
+                      <img [src]="item.image || 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=300'" [alt]="item.title" class="item-thumb" />
+                    </div>
+                    <div class="item-details">
+                      <h5 class="item-name">{{ item.title }}</h5>
+                      <div class="item-meta">
+                        <span class="item-badge">Talla: <strong>{{ item.size || 'M' }}</strong></span>
+                        @if (item.color) {
+                          <span class="item-badge">Color: <strong>{{ item.color }}</strong></span>
+                        }
+                        <span class="item-badge">Cant: <strong>{{ item.quantity }}</strong></span>
+                      </div>
+                    </div>
+                    <div class="item-price-box">
+                      <span class="item-price">${{ (item.price * item.quantity) | number:'1.0-0' }} COP</span>
+                      @if (item.quantity > 1) {
+                        <small class="unit-price">(${{ item.price | number:'1.0-0' }} c/u)</small>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Shipping & Financial Summary -->
+            <div class="order-summary-grid">
+              <div class="summary-box">
+                <h5>Datos de Entrega</h5>
+                <p><strong>Destinatario:</strong> {{ ord.customerName }}</p>
+                <p><strong>Dirección:</strong> {{ ord.shippingAddress }}</p>
+                <p><strong>Ciudad:</strong> {{ ord.city }}</p>
+                <p><strong>Teléfono:</strong> {{ ord.customerPhone }}</p>
+                @if (ord.notes) {
+                  <p class="summary-notes"><strong>Notas:</strong> {{ ord.notes }}</p>
+                }
+              </div>
+
+              <div class="summary-box">
+                <h5>Detalle de Pago</h5>
+                <p><strong>Método:</strong> {{ ord.paymentMethod || 'Transferencia Bancaria' }}</p>
+                <p><strong>Subtotal:</strong> ${{ ord.subtotal | number:'1.0-0' }} COP</p>
+                @if (ord.discount && ord.discount > 0) {
+                  <p class="discount-line">
+                    <strong>Descuento {{ ord.discountCode ? '(' + ord.discountCode + ')' : '' }}:</strong>
+                    -${{ ord.discount | number:'1.0-0' }} COP
+                  </p>
+                }
+                <p><strong>Costo de Envío:</strong> Gratis</p>
+                <div class="total-line">
+                  <span>Total:</span>
+                  <strong>${{ ord.total | number:'1.0-0' }} COP</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- Order Card Footer Actions -->
+            <div class="order-card-footer flex-between">
+              <div class="footer-left-info">
+                <span class="admin-sync-hint">Los cambios hechos por el administrador se actualizan automáticamente aquí.</span>
+              </div>
+              <div class="order-actions-group">
+                <a
+                  [href]="getWhatsAppSupportUrl(ord)"
+                  target="_blank"
+                  class="btn btn-whatsapp btn-sm"
+                  title="Preguntar por este pedido en WhatsApp"
+                >
+                  💬 Consultar por WhatsApp
+                </a>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Empty State -->
+    @if (!isLoading() && orders().length === 0) {
+      <div class="empty-orders-card animate-fade-in text-center">
+        <div class="empty-icon">📦</div>
+        <h3>No tienes pedidos activos guardados en este navegador</h3>
+        <p>
+          Si realizaste una compra recientemente, ingresa tu <strong>número de orden</strong> (ej: MOU-...) o tu <strong>correo electrónico</strong> en el buscador superior para rastrearla de inmediato.
+        </p>
+        <div class="empty-actions">
+          <a routerLink="/catalog" class="btn btn-black btn-lg">Explorar Colección &rarr;</a>
+        </div>
+      </div>
+    }
+  </div>
+</div>

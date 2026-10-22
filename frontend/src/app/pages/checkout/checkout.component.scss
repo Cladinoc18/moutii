@@ -1,0 +1,558 @@
+.checkout-page {
+  padding: 40px 0 90px;
+}
+.checkout-page-title {
+  font-size: 2.8rem;
+  margin-bottom: 32px;
+  text-align: center;
+}
+.checkout-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 48px;
+}
+.checkout-form-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.panel-section {
+  background: #FFFFFF;
+  border: 1px solid var(--mouti-border);
+  padding: 32px;
+}
+.panel-title {
+  font-size: 1.4rem;
+  margin-bottom: 6px;
+}
+.panel-sub {
+  font-size: 0.88rem;
+  margin-bottom: 24px;
+}
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+.flex-1 { flex: 1; }
+.flex-2 { flex: 2; }
+.payment-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.payment-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--mouti-border);
+  cursor: pointer;
+  transition: var(--transition-fast);
+
+  &.selected {
+    border-color: var(--mouti-cafe);
+    background-color: var(--mouti-surface-beige);
+  }
+  input {
+    margin-top: 4px;
+    accent-color: var(--mouti-cafe);
+  }
+  strong {
+    font-size: 0.95rem;
+    display: block;
+    margin-bottom: 2px;
+    color: var(--mouti-black);
+  }
+  p {
+    font-size: 0.82rem;
+    margin: 0;
+  }
+}
+.summary-card {
+  background: #FFFFFF;
+  border: 1px solid var(--mouti-border);
+  padding: 32px;
+  position: sticky;
+  top: 100px;
+}
+.summary-title {
+  font-size: 1.4rem;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--mouti-border);
+}
+.summary-items {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 240px;
+  overflow-y: auto;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--mouti-border);
+  margin-bottom: 20px;
+}
+.checkout-item {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.checkout-thumb {
+  width: 50px;
+  height: 64px;
+  object-fit: cover;
+  background: var(--mouti-surface-beige);
+}
+.checkout-item-info {
+  flex: 1;
+  h4 { font-size: 0.88rem; margin: 0; }
+  span { font-size: 0.75rem; color: var(--mouti-text-muted); display: block; }
+  strong { font-size: 0.85rem; color: var(--mouti-cafe); }
+}
+.summary-calc {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.calc-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: var(--mouti-text-secondary);
+}
+.discount-row {
+  color: var(--mouti-latte);
+  font-weight: 600;
+}
+.free-shipping {
+  color: var(--mouti-success);
+  font-weight: 600;
+}
+.total-calc-row {
+  border-top: 1px solid var(--mouti-border);
+  padding-top: 14px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--mouti-black);
+}
+.total-big {
+  color: var(--mouti-cafe-dark);
+  font-size: 1.3rem;
+}
+.submit-order-btn {
+  width: 100%;
+}
+.error-box {
+  background-color: #FDEDEC;
+  color: var(--mouti-danger);
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  border: 1px solid #F5B7B1;
+  margin-bottom: 16px;
+}
+
+/* Success state */
+.success-card {
+  max-width: 640px;
+  margin: 40px auto;
+  background: #FFFFFF;
+  border: 1px solid var(--mouti-border);
+  padding: 48px;
+}
+.success-icon {
+  width: 64px;
+  height: 64px;
+  background-color: var(--mouti-surface-beige);
+  color: var(--mouti-latte);
+  font-size: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+.success-title {
+  font-size: 2.6rem;
+  margin-bottom: 12px;
+}
+.order-id-badge {
+  display: inline-block;
+  background: var(--mouti-surface-beige);
+  padding: 6px 16px;
+  border: 1px solid var(--mouti-border);
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+}
+.success-desc {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  margin-bottom: 28px;
+}
+.order-recap {
+  background: var(--mouti-surface-beige);
+  padding: 20px;
+  text-align: left;
+  margin-bottom: 32px;
+  h3 { font-size: 1.05rem; margin-bottom: 12px; }
+}
+.recap-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.88rem;
+  padding: 6px 0;
+  border-bottom: 1px dashed var(--mouti-border-dark);
+}
+.recap-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.1rem;
+  margin-top: 12px;
+}
+
+/* WhatsApp Button Styles */
+.btn-whatsapp {
+  background-color: #25D366;
+  color: #FFFFFF;
+  border: 1px solid #1EBE5D;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  transition: var(--transition-fast);
+  box-shadow: 0 4px 14px rgba(37, 211, 102, 0.35);
+
+  &:hover {
+    background-color: #20BA5A;
+    color: #FFFFFF;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(37, 211, 102, 0.45);
+  }
+}
+.btn-xl {
+  padding: 16px 32px;
+  font-size: 1.05rem;
+}
+
+/* Bank Details Section */
+.bank-details-box {
+  margin-top: 20px;
+  padding: 24px;
+  background: var(--mouti-surface-beige);
+  border: 1px solid var(--mouti-border);
+}
+.bank-box-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.bank-box-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  h4 {
+    margin: 0;
+    font-size: 1.15rem;
+    color: var(--mouti-black);
+  }
+}
+.step-guide {
+  font-size: 0.78rem;
+  color: var(--mouti-text-muted);
+  font-weight: 500;
+}
+.bank-instructions {
+  font-size: 0.88rem;
+  color: var(--mouti-text-secondary);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+.bank-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.bank-detail-card {
+  background: #FFFFFF;
+  border: 1px solid var(--mouti-border);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  transition: var(--transition-fast);
+
+  &.highlight-card {
+    border: 1.5px solid var(--mouti-cafe);
+    background: #FFFDF9;
+  }
+}
+.card-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.bank-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--mouti-cafe-dark);
+}
+.bank-type {
+  font-size: 0.76rem;
+  color: var(--mouti-text-muted);
+}
+.badge-free {
+  font-size: 0.7rem;
+  color: #047857;
+  background: #ECFDF5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  width: fit-content;
+}
+.badge-instant {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #047857;
+  background: #ECFDF5;
+  border: 1px solid #A7F3D0;
+  padding: 2px 8px;
+}
+.card-data {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.data-label {
+  font-size: 0.75rem;
+  color: var(--mouti-text-muted);
+}
+.data-val {
+  font-family: monospace;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--mouti-black);
+  letter-spacing: 0.06em;
+  &.key-val {
+    color: var(--mouti-cafe);
+    font-size: 1.05rem;
+  }
+}
+.data-sub {
+  font-size: 0.75rem;
+  color: var(--mouti-text-secondary);
+  line-height: 1.3;
+}
+.bank-note {
+  font-size: 0.72rem;
+  color: var(--mouti-text-muted);
+  line-height: 1.3;
+}
+.btn-copy {
+  background: #FFFFFF;
+  border: 1px solid var(--mouti-border-dark);
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--mouti-black);
+  transition: var(--transition-fast);
+  width: 100%;
+  text-align: center;
+
+  &:hover {
+    background-color: var(--mouti-surface-beige);
+    border-color: var(--mouti-cafe);
+  }
+
+  &.copied {
+    background-color: #DEF7EC;
+    color: #03543F;
+    border-color: #84E1BC;
+  }
+}
+.btn-copy-sm {
+  padding: 3px 8px;
+  font-size: 0.74rem;
+  margin-top: 4px;
+}
+
+/* 3-Step Banner */
+.payment-steps-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #FFFFFF;
+  border: 1px dashed var(--mouti-border-dark);
+  padding: 12px 18px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--mouti-text-secondary);
+  font-weight: 500;
+}
+.step-number {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--mouti-cafe);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.step-arrow {
+  color: var(--mouti-border-dark);
+  font-weight: bold;
+}
+
+/* Success Card Elements */
+.success-icon-whatsapp {
+  width: 68px;
+  height: 68px;
+  background-color: #E8FDF0;
+  color: #25D366;
+  font-size: 2.2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+.order-status-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  background: #DEF7EC;
+  color: #03543F;
+  margin-bottom: 20px;
+
+  &.status-payment-pending {
+    background: #FEF3C7;
+    color: #92400E;
+    border: 1px solid #FCD34D;
+  }
+}
+.whatsapp-action-box {
+  margin: 24px 0 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.whatsapp-direct-btn {
+  display: inline-block;
+  text-decoration: none;
+  padding: 16px 36px;
+  font-size: 1.05rem;
+}
+.whatsapp-helper {
+  font-size: 0.78rem;
+  color: var(--mouti-text-muted);
+}
+.recap-bank-box {
+  background: var(--mouti-surface-beige);
+  border: 1px solid var(--mouti-border);
+  padding: 20px;
+  margin-bottom: 24px;
+
+  h4 {
+    margin: 0 0 12px;
+    font-size: 0.95rem;
+    color: var(--mouti-black);
+  }
+}
+.recap-bank-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.recap-bank-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed var(--mouti-border);
+}
+.recap-discount {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.88rem;
+  padding: 6px 0;
+  color: var(--mouti-latte);
+  font-weight: 600;
+  border-bottom: 1px dashed var(--mouti-border-dark);
+}
+
+@media (max-width: 960px) {
+  .checkout-grid {
+    grid-template-columns: 1fr;
+  }
+  .summary-card {
+    position: relative;
+    top: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .checkout-page {
+    padding: 24px 0 60px;
+  }
+  .checkout-page-title {
+    font-size: 2rem;
+    margin-bottom: 20px;
+  }
+  .form-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .panel-section {
+    padding: 20px 16px;
+  }
+  .panel-title {
+    font-size: 1.25rem;
+  }
+  .bank-details-box {
+    padding: 16px 12px;
+  }
+  .bank-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .payment-steps-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+
+    .step-arrow {
+      display: none;
+    }
+  }
+  .whatsapp-direct-btn {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 0.92rem;
+    text-align: center;
+  }
+  .success-card {
+    padding: 28px 16px;
+    margin: 20px auto;
+  }
+  .success-title {
+    font-size: 1.75rem;
+  }
+  .recap-bank-line {
+    flex-direction: column;
+    gap: 4px;
+  }
+}

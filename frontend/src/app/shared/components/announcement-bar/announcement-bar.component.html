@@ -1,0 +1,9 @@
+@if (configService.config().announcementBar.isEnabled) {
+  <div class="announcement-bar">
+    <div class="container text-center">
+      <p class="announcement-text">
+        {{ configService.config().announcementBar.text }}
+      </p>
+    </div>
+  </div>
+}

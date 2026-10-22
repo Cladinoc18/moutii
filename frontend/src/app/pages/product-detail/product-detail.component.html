@@ -1,0 +1,413 @@
+@if (product()) {
+  <div class="product-detail-page">
+    <div class="container">
+      <!-- Breadcrumbs -->
+      <nav class="breadcrumb-nav">
+        <a routerLink="/">Inicio</a>
+        <span class="sep">/</span>
+        <a routerLink="/catalog">Colección</a>
+        <span class="sep">/</span>
+        <a [routerLink]="['/catalog']" [queryParams]="{ category: product()?.category }">{{ product()?.category }}</a>
+        <span class="sep">/</span>
+        <span class="active-crumb">{{ product()?.title }}</span>
+      </nav>
+
+      <!-- Product Grid Details -->
+      <div class="product-layout-grid">
+        <!-- Left: Gallery Carousel -->
+        <div class="gallery-column">
+          <div class="main-image-box carousel-container">
+            <img
+              [src]="selectedImage() || product()?.images?.[0] || 'logo.png'"
+              [alt]="product()?.title"
+              class="main-img"
+            />
+
+            <!-- Carousel Navigation Controls -->
+            @if (product()?.images && product()!.images.length > 1) {
+              <button
+                type="button"
+                class="carousel-nav-btn prev-btn"
+                (click)="prevImage($event)"
+                aria-label="Imagen anterior"
+                title="Anterior"
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+              </button>
+
+              <button
+                type="button"
+                class="carousel-nav-btn next-btn"
+                (click)="nextImage($event)"
+                aria-label="Siguiente imagen"
+                title="Siguiente"
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </button>
+
+              <!-- Image Counter Badge -->
+              <span class="carousel-counter-badge">
+                {{ currentImageIndex() + 1 }} / {{ product()!.images.length }}
+              </span>
+
+              <!-- Dots Indicators -->
+              <div class="carousel-dots-wrapper">
+                @for (img of product()!.images; track img; let i = $index) {
+                  <button
+                    type="button"
+                    class="carousel-dot"
+                    [class.active]="currentImageIndex() === i"
+                    (click)="selectImageByIndex(i)"
+                    [attr.aria-label]="'Ver imagen ' + (i + 1)"
+                  ></button>
+                }
+              </div>
+            }
+
+            @if (product()?.discountPercent && product()!.discountPercent! > 0) {
+              <span class="badge badge-discount detail-badge">-{{ product()?.discountPercent }}% OFF</span>
+            }
+          </div>
+
+          @if (product()?.images && product()!.images.length > 1) {
+            <div class="thumbnail-strip">
+              @for (img of product()!.images; track img; let i = $index) {
+                <button
+                  type="button"
+                  class="thumb-btn"
+                  [class.active]="currentImageIndex() === i"
+                  (click)="selectImage(img, i)"
+                >
+                  <img [src]="img" [alt]="product()?.title" class="thumb-img" />
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Right: Information & Cart Actions -->
+        <div class="info-column">
+          <span class="section-tag">{{ product()?.category }}</span>
+          <h1 class="detail-title">{{ product()?.title }}</h1>
+
+          <!-- Price breakdown -->
+          <div class="price-container">
+            @if (product()?.discountPrice && product()!.discountPrice! > 0) {
+              <span class="price-original">${{ product()?.price | number:'1.0-0' }}</span>
+              <span class="price-discounted">${{ product()?.discountPrice | number:'1.0-0' }} COP</span>
+              <span class="discount-pill">-{{ product()?.discountPercent }}% OFF</span>
+            } @else {
+              <span class="price-current">${{ product()?.price | number:'1.0-0' }} COP</span>
+            }
+          </div>
+
+          <div class="description-text">
+            <p>{{ product()?.description }}</p>
+          </div>
+
+          <!-- Color selection -->
+          @if (product()?.colors && product()!.colors.length > 0) {
+            <div class="option-section">
+              <label class="option-label">Color: <strong>{{ selectedColor() }}</strong></label>
+              <div class="color-options">
+                @for (col of product()!.colors; track col.name) {
+                  @if (col && col.name) {
+                    <button
+                      class="color-btn"
+                      [class.active]="selectedColor() === col.name"
+                      (click)="selectedColor.set(col.name)"
+                      [title]="col.name"
+                    >
+                      <span class="color-swatch" [style.background-color]="col.hex"></span>
+                      <span class="color-name">{{ col.name }}</span>
+                    </button>
+                  }
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Size selection -->
+          @if (product()?.sizes && product()!.sizes.length > 0) {
+            <div class="option-section">
+              <div class="flex-between">
+                <label class="option-label">Talla: <strong>{{ selectedSize() }}</strong></label>
+                <button type="button" class="size-guide-btn" (click)="openSizeGuide()">
+                  <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
+                    <path d="M21 6H3a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1z"></path>
+                    <path d="M6 6v4M10 6v6M14 6v4M18 6v6"></path>
+                  </svg>
+                  <span>Guía de tallas</span>
+                </button>
+              </div>
+              <div class="size-options">
+                @for (s of product()!.sizes; track s) {
+                  <button
+                    class="size-btn"
+                    [class.active]="selectedSize() === s"
+                    (click)="selectedSize.set(s)"
+                  >
+                    {{ s }}
+                  </button>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Quantity & Add to Cart -->
+          <div class="cart-action-section">
+            <div class="qty-selector">
+              <button class="qty-btn" (click)="decrementQty()">-</button>
+              <span class="qty-display">{{ quantity() }}</span>
+              <button class="qty-btn" (click)="incrementQty()">+</button>
+            </div>
+
+            <button class="btn btn-black btn-lg add-cart-btn" (click)="addToCart()">
+              <span>Agregar a la Bolsa</span>
+              <span class="btn-dot">&bull;</span>
+              <span>${{ (currentUnitPrice() * quantity()) | number:'1.0-0' }} COP</span>
+            </button>
+          </div>
+
+          <!-- Stock & Shipping Notice -->
+          <div class="perks-card">
+            <div class="perk-item">
+              <span class="perk-icon">📦</span>
+              <div>
+                <strong>Envío Nacional Gratuito</strong>
+                <p>En pedidos superiores a $150.000 COP. Entrega en 2 a 4 días hábiles.</p>
+              </div>
+            </div>
+            <div class="perk-item">
+              <span class="perk-icon">🌿</span>
+              <div>
+                <strong>Confección Artesanal & Lino Noble</strong>
+                <p>Hecho con fibras naturales y acabados de alta costura diseñados por Daniela Mejía.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Related products -->
+      @if (relatedProducts().length > 0) {
+        <section class="related-section">
+          <div class="related-head text-center">
+            <span class="related-tag">Colección Moutii</span>
+            <h2 class="section-title">Productos Similares</h2>
+            <p class="related-sub">Otras siluetas de la colección que podrían interesarte</p>
+          </div>
+          <div class="related-grid">
+            @for (prod of relatedProducts(); track prod._id) {
+              <app-product-card [product]="prod"></app-product-card>
+            }
+          </div>
+        </section>
+      }
+    </div>
+  </div>
+} @else if (loading()) {
+  <div class="container py-5 text-center">
+    <p>Cargando detalles de la prenda...</p>
+  </div>
+} @else {
+  <div class="container py-5 text-center">
+    <h2>Prenda no encontrada</h2>
+    <a routerLink="/catalog" class="btn btn-black mt-3">Volver al Catálogo</a>
+  </div>
+}
+
+<!-- Size Guide Modal -->
+@if (showSizeGuide()) {
+  <div class="modal-backdrop" (click)="closeSizeGuide()">
+    <div class="modal-dialog size-guide-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-tag">MOUTII ATELIER</span>
+          <h2 class="modal-title">Guía de Tallas</h2>
+          <p class="modal-subtitle">Medidas corporales exactas en centímetros (cm) para encontrar tu calce ideal.</p>
+        </div>
+        <button type="button" class="modal-close-btn" (click)="closeSizeGuide()" aria-label="Cerrar guía de tallas">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="guide-tabs">
+        <button
+          type="button"
+          class="guide-tab-btn"
+          [class.active]="activeSizeGuideTab() === 'tops'"
+          (click)="activeSizeGuideTab.set('tops')"
+        >
+          Prendas Superiores
+        </button>
+        <button
+          type="button"
+          class="guide-tab-btn"
+          [class.active]="activeSizeGuideTab() === 'bottoms'"
+          (click)="activeSizeGuideTab.set('bottoms')"
+        >
+          Prendas Inferiores
+        </button>
+        <button
+          type="button"
+          class="guide-tab-btn"
+          [class.active]="activeSizeGuideTab() === 'howto'"
+          (click)="activeSizeGuideTab.set('howto')"
+        >
+          ¿Cómo medirse?
+        </button>
+      </div>
+
+      <!-- Tab 1: Tops -->
+      @if (activeSizeGuideTab() === 'tops') {
+        <div class="guide-table-wrapper">
+          <table class="guide-table">
+            <thead>
+              <tr>
+                <th>Talla</th>
+                <th>Pecho / Busto (cm)</th>
+                <th>Cintura (cm)</th>
+                <th>Cadera (cm)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr [class.highlighted]="selectedSize() === 'XS'">
+                <td class="size-col"><strong>XS</strong></td>
+                <td>84 - 88</td>
+                <td>66 - 70</td>
+                <td>88 - 92</td>
+              </tr>
+              <tr [class.highlighted]="selectedSize() === 'S'">
+                <td class="size-col"><strong>S</strong></td>
+                <td>89 - 94</td>
+                <td>71 - 76</td>
+                <td>93 - 98</td>
+              </tr>
+              <tr [class.highlighted]="selectedSize() === 'M'">
+                <td class="size-col"><strong>M</strong></td>
+                <td>95 - 100</td>
+                <td>77 - 82</td>
+                <td>99 - 104</td>
+              </tr>
+              <tr [class.highlighted]="selectedSize() === 'L'">
+                <td class="size-col"><strong>L</strong></td>
+                <td>101 - 106</td>
+                <td>83 - 88</td>
+                <td>105 - 110</td>
+              </tr>
+              <tr [class.highlighted]="selectedSize() === 'XL'">
+                <td class="size-col"><strong>XL</strong></td>
+                <td>107 - 112</td>
+                <td>89 - 95</td>
+                <td>111 - 116</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="guide-hint">
+            * Aplica para camisas, lino, chalecos, blazers, tops y vestidos. Si dudas entre dos tallas, te recomendamos la mayor para un calce más relajado.
+          </p>
+        </div>
+      }
+
+      <!-- Tab 2: Bottoms -->
+      @if (activeSizeGuideTab() === 'bottoms') {
+        <div class="guide-table-wrapper">
+          <table class="guide-table">
+            <thead>
+              <tr>
+                <th>Talla</th>
+                <th>Cintura (cm)</th>
+                <th>Cadera (cm)</th>
+                <th>Largo Entrepierna (cm)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr [class.highlighted]="selectedSize() === 'XS' || selectedSize() === '28'">
+                <td class="size-col"><strong>XS (28)</strong></td>
+                <td>70 - 74</td>
+                <td>88 - 92</td>
+                <td>78</td>
+              </tr>
+              <tr [class.highlighted]="selectedSize() === 'S' || selectedSize() === '30'">
+                <td class="size-col"><strong>S (30)</strong></td>
+                <td>75 - 79</td>
+                <td>93 - 97</td>
+                <td>80</td>
+              </tr>
+              <tr [class.highlighted]="selectedSize() === 'M' || selectedSize() === '32'">
+                <td class="size-col"><strong>M (32)</strong></td>
+                <td>80 - 85</td>
+                <td>98 - 103</td>
+                <td>81</td>
+              </tr>
+              <tr [class.highlighted]="selectedSize() === 'L' || selectedSize() === '34'">
+                <td class="size-col"><strong>L (34)</strong></td>
+                <td>86 - 91</td>
+                <td>104 - 109</td>
+                <td>82</td>
+              </tr>
+              <tr [class.highlighted]="selectedSize() === 'XL' || selectedSize() === '36'">
+                <td class="size-col"><strong>XL (36)</strong></td>
+                <td>92 - 98</td>
+                <td>110 - 116</td>
+                <td>83</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="guide-hint">
+            * Aplica para pantalones sastre, lino palazzo, bermudas y faldas. Medidas calculadas para tiro medio/alto estándar.
+          </p>
+        </div>
+      }
+
+      <!-- Tab 3: How to measure -->
+      @if (activeSizeGuideTab() === 'howto') {
+        <div class="howto-content">
+          <div class="howto-item">
+            <div class="howto-badge">1</div>
+            <div class="howto-info">
+              <h4>Pecho / Busto</h4>
+              <p>Pasa la cinta métrica por debajo de los brazos y alrededor de la parte más prominente del pecho, manteniéndola horizontal.</p>
+            </div>
+          </div>
+          <div class="howto-item">
+            <div class="howto-badge">2</div>
+            <div class="howto-info">
+              <h4>Cintura</h4>
+              <p>Mide alrededor del contorno natural de la cintura, justo por encima del ombligo donde el torso es más estrecho.</p>
+            </div>
+          </div>
+          <div class="howto-item">
+            <div class="howto-badge">3</div>
+            <div class="howto-info">
+              <h4>Cadera</h4>
+              <p>Con los pies juntos, pasa la cinta por la zona más ancha de la cadera y glúteos.</p>
+            </div>
+          </div>
+          <div class="howto-item">
+            <div class="howto-badge">4</div>
+            <div class="howto-info">
+              <h4>Largo de pierna</h4>
+              <p>Mide desde la entrepierna por la parte interna del muslo hasta el tobillo.</p>
+            </div>
+          </div>
+        </div>
+      }
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-black" (click)="closeSizeGuide()">
+          Cerrar guía
+        </button>
+      </div>
+    </div>
+  </div>
+}

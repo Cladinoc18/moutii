@@ -1,0 +1,57 @@
+<footer class="footer">
+  <div class="container footer-grid">
+    <!-- Brand & Designer column -->
+    <div class="footer-brand-col">
+      <img src="logo.png" alt="MOUTII" class="footer-logo" />
+      <p class="brand-text">
+        Prendas de autor con alma atemporal. Diseñadas en Colombia por Daniela Mejía para celebrar la elegancia, la autenticidad y la textura viva del lino.
+      </p>
+      <div class="social-links">
+        <a [href]="configService.config().contact.instagram || '#'" target="_blank" class="social-link" title="Instagram">
+          Instagram &rarr;
+        </a>
+      </div>
+    </div>
+
+    <!-- Collections -->
+    <div class="footer-col">
+      <h4 class="col-title">Colecciones</h4>
+      <ul class="col-list">
+        <li><a [routerLink]="['/catalog']" [queryParams]="{ category: 'Vestidos' }">Vestidos en Lino</a></li>
+        <li><a [routerLink]="['/catalog']" [queryParams]="{ category: 'Chaquetas & Blazers' }">Sastrería & Blazers</a></li>
+        <li><a [routerLink]="['/catalog']" [queryParams]="{ category: 'Pantalones' }">Pantalones Palazzo</a></li>
+        <li><a [routerLink]="['/catalog']" [queryParams]="{ category: 'Tops & Blusas' }">Tops Minimalistas</a></li>
+        <li><a [routerLink]="['/catalog']" [queryParams]="{ onSale: true }">Piezas en Descuento</a></li>
+      </ul>
+    </div>
+
+    <!-- Help & Contact -->
+    <div class="footer-col">
+      <h4 class="col-title">Atención al Cliente</h4>
+      <ul class="col-list">
+        <li><span>Email: {{ configService.config().contact.email }}</span></li>
+        <li><span>Tel: {{ configService.config().contact.phone }}</span></li>
+        <li><span>Atención: {{ configService.config().contact.schedule }}</span></li>
+        <li><span>Ubicación: {{ configService.config().contact.address }}</span></li>
+      </ul>
+    </div>
+
+    <!-- Admin & Account quick link -->
+    <div class="footer-col">
+      <h4 class="col-title">Moutii Privé</h4>
+      <ul class="col-list">
+        <li><a routerLink="/orders">📦 Rastrear Tus Pedidos</a></li>
+        <li><a routerLink="/login">Acceso de Clientes</a></li>
+        <li><a routerLink="/admin">Portal de Administración</a></li>
+        <li><span class="secure-badge">🔒 Compras 100% Protegidas</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <div class="container footer-bottom-content">
+      <p>© 2026 MOUTII — By Daniela Mejía. Todos los derechos reservados.</p>
+      <p class="tagline">Elegancia, diseño atemporal & texturas nobles.</p>
+    </div>
+  </div>
+</footer>

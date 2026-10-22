@@ -1,0 +1,381 @@
+<div class="checkout-page">
+  <div class="container">
+    @if (orderSuccess()) {
+      <div class="success-card animate-fade-in text-center">
+        <div class="success-icon-whatsapp">💬</div>
+        <span class="section-tag">¡Gracias por tu compra!</span>
+        <h1 class="success-title">Tu orden #{{ createdOrder()?.orderNumber }} ha sido registrada</h1>
+
+        <div class="order-status-badge" [class.status-payment-pending]="createdOrder()?.paymentMethod?.includes('Transferencia')">
+          Estado: <strong>{{ createdOrder()?.status || 'Pendiente de Pago' }}</strong>
+        </div>
+
+        <p class="success-desc">
+          Hemos registrado tu pedido a nombre de <strong>{{ createdOrder()?.customerName }}</strong> para entrega en <strong>{{ createdOrder()?.city }}</strong>.
+          @if (createdOrder()?.paymentMethod?.includes('Transferencia')) {
+            Para verificar tu pago y coordinar el despacho inmediato, haz clic a continuación para abrir WhatsApp y <strong>adjuntar la captura del comprobante de transferencia</strong>.
+          } @else {
+            Haz clic a continuación para coordinar los detalles de despacho contra entrega con nuestro equipo en WhatsApp.
+          }
+        </p>
+
+        <!-- Prominent WhatsApp Action Button -->
+        <div class="whatsapp-action-box">
+          <a
+            [href]="whatsappUrl()"
+            target="_blank"
+            class="btn btn-whatsapp btn-xl whatsapp-direct-btn"
+          >
+            💬 Abrir Chat de WhatsApp con Comprobante &rarr;
+          </a>
+          <small class="whatsapp-helper">Si no se abrió automáticamente, haz clic en el botón verde de arriba.</small>
+        </div>
+
+        <!-- Bank transfer reference card in success screen -->
+        @if (createdOrder()?.paymentMethod?.includes('Transferencia')) {
+          <div class="recap-bank-box text-left">
+            <h4>Datos para realizar o verificar tu transferencia:</h4>
+            <div class="recap-bank-items">
+              <div class="recap-bank-line">
+                <span>🔑 <strong>Pago con Llave (Transfiya):</strong></span>
+                <span>{{ storeConfigService.config().bankTransfer?.llaveNumber || '300 123 4567' }} ({{ storeConfigService.config().bankTransfer?.llaveType || 'Número Celular' }})</span>
+              </div>
+              <div class="recap-bank-line">
+                <span>🏦 <strong>Bancolombia {{ storeConfigService.config().bankTransfer?.accountType || 'Ahorros' }}:</strong></span>
+                <span>{{ storeConfigService.config().bankTransfer?.accountNumber || '300-123456-78' }} — {{ storeConfigService.config().bankTransfer?.accountHolder || 'Daniela Mejía' }}</span>
+              </div>
+              <div class="recap-bank-line">
+                <span>🟣 <strong>Nequi / Daviplata:</strong></span>
+                <span>{{ storeConfigService.config().bankTransfer?.nequiPhone || '300 123 4567' }}</span>
+              </div>
+            </div>
+          </div>
+        }
+
+        <div class="order-recap">
+          <h3>Resumen de lo solicitado:</h3>
+          <div class="recap-items">
+            @for (item of createdOrder()?.items; track item.productId) {
+              <div class="recap-item">
+                <span>{{ item.quantity }}x {{ item.title }} ({{ item.size }})</span>
+                <span>${{ (item.price * item.quantity) | number:'1.0-0' }} COP</span>
+              </div>
+            }
+          </div>
+          @if (createdOrder()?.discount && (createdOrder()?.discount || 0) > 0) {
+            <div class="recap-discount">
+              <span>Descuento aplicado:</span>
+              <span>-${{ createdOrder()?.discount | number:'1.0-0' }} COP</span>
+            </div>
+          }
+          <div class="recap-total">
+            <span>Total a pagar:</span>
+            <strong>${{ createdOrder()?.total | number:'1.0-0' }} COP</strong>
+          </div>
+        </div>
+
+        <div class="success-actions flex-center gap-3">
+          <a [routerLink]="['/orders']" [queryParams]="{ number: createdOrder()?.orderNumber }" class="btn btn-black btn-lg">
+            📦 Ver Estado en "Tus Pedidos" &rarr;
+          </a>
+          <a routerLink="/catalog" class="btn btn-outline btn-lg">Seguir Explorando el Catálogo</a>
+        </div>
+      </div>
+    } @else if (cartService.items().length === 0) {
+      <div class="empty-checkout text-center py-5">
+        <h2>No tienes prendas en tu bolsa de compras</h2>
+        <p>Agrega piezas de nuestra colección antes de proceder al pago.</p>
+        <a routerLink="/catalog" class="btn btn-black btn-lg mt-3">Ir al Catálogo</a>
+      </div>
+    } @else {
+      <h1 class="checkout-page-title">Finalizar Pedido</h1>
+      <div class="checkout-grid">
+        <!-- Form: Shipping & Contact -->
+        <div class="checkout-form-panel">
+          <div class="panel-section">
+            <h2 class="panel-title">1. Datos de Contacto y Envío</h2>
+            <p class="panel-sub">Completa los datos para coordinar el envío de tus prendas.</p>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label class="form-label">Nombre Completo *</label>
+                <input
+                  type="text"
+                  [(ngModel)]="formData.customerName"
+                  placeholder="Ej: Daniela Mejía"
+                  class="form-control"
+                  required
+                />
+              </div>
+
+              <div class="form-group flex-1">
+                <label class="form-label">Teléfono / WhatsApp *</label>
+                <input
+                  type="tel"
+                  [(ngModel)]="formData.customerPhone"
+                  placeholder="Ej: 300 123 4567"
+                  class="form-control"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Correo Electrónico *</label>
+              <input
+                type="email"
+                [(ngModel)]="formData.customerEmail"
+                placeholder="ejemplo@correo.com"
+                class="form-control"
+                required
+              />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-2">
+                <label class="form-label">Dirección de Entrega *</label>
+                <input
+                  type="text"
+                  [(ngModel)]="formData.shippingAddress"
+                  placeholder="Calle, Carrera, Edificio o Apto"
+                  class="form-control"
+                  required
+                />
+              </div>
+
+              <div class="form-group flex-1">
+                <label class="form-label">Ciudad *</label>
+                <input
+                  type="text"
+                  [(ngModel)]="formData.city"
+                  placeholder="Bogotá, Medellín, Cali..."
+                  class="form-control"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Notas Adicionales (Opcional)</label>
+              <textarea
+                [(ngModel)]="formData.notes"
+                placeholder="Indicaciones de entrega, referencias, etc."
+                class="form-control"
+                rows="2"
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- Payment options -->
+          <div class="panel-section">
+            <h2 class="panel-title">2. Método de Pago</h2>
+            <div class="payment-options">
+              <label class="payment-card" [class.selected]="paymentMethod === 'Transferencia Bancaria'">
+                <input
+                  type="radio"
+                  name="payment"
+                  value="Transferencia Bancaria"
+                  [(ngModel)]="paymentMethod"
+                />
+                <div class="payment-card-content flex-1">
+                  <div class="flex-between">
+                    <strong>Transferencia Bancaria & Pago con Llave (Recomendado)</strong>
+                    <span class="badge-instant">Instantáneo · 0% Comisión</span>
+                  </div>
+                  <p>Paga desde cualquier banco con tu Llave (Transfiya) o a Bancolombia / Nequi / Daviplata.</p>
+                </div>
+              </label>
+
+              <label class="payment-card" [class.selected]="paymentMethod === 'Contra Entrega'">
+                <input
+                  type="radio"
+                  name="payment"
+                  value="Contra Entrega"
+                  [(ngModel)]="paymentMethod"
+                />
+                <div>
+                  <strong>Pago Contra Entrega</strong>
+                  <p>Pagas en efectivo o transferencia cuando recibas tu pedido en casa.</p>
+                </div>
+              </label>
+            </div>
+
+            <!-- Bank details box when Transferencia Bancaria is selected -->
+            @if (paymentMethod === 'Transferencia Bancaria') {
+              <div class="bank-details-box animate-fade-in">
+                <div class="bank-box-header">
+                  <div class="bank-box-title">
+                    <span class="icon-bank">🏦</span>
+                    <h4>Datos para tu Transferencia o Pago con Llave</h4>
+                  </div>
+                  <span class="step-guide">Copia el número con 1 clic y realiza la transferencia</span>
+                </div>
+
+                <p class="bank-instructions">
+                  {{ storeConfigService.config().bankTransfer?.instructions || 'Transfiere desde la app de cualquier banco usando tu Llave o a nuestra cuenta Bancolombia / Nequi, y adjunta el comprobante al confirmar por WhatsApp.' }}
+                </p>
+
+                <div class="bank-cards-grid">
+                  <!-- 1. Llave (Transfiya) -->
+                  <div class="bank-detail-card highlight-card">
+                    <div class="card-head">
+                      <span class="bank-name">🔑 PAGO CON LLAVE (Transfiya)</span>
+                      <span class="badge-free">Cualquier Banco</span>
+                    </div>
+                    <div class="card-data">
+                      <span class="data-label">Tipo: {{ storeConfigService.config().bankTransfer?.llaveType || 'Número Celular' }}</span>
+                      <span class="data-val key-val">{{ storeConfigService.config().bankTransfer?.llaveNumber || '300 123 4567' }}</span>
+                    </div>
+                    <button
+                      type="button"
+                      class="btn-copy"
+                      [class.copied]="copiedKey() === 'llave'"
+                      (click)="copyToClipboard(cleanNumber(storeConfigService.config().bankTransfer?.llaveNumber || '3001234567'), 'llave')"
+                    >
+                      {{ copiedKey() === 'llave' ? '✔ ¡Llave Copiada!' : 'Copiar Llave 📋' }}
+                    </button>
+                    <small class="bank-note">Compatible con Nu, Bancolombia, Nequi, Davivienda, Daviplata, Falabella, etc.</small>
+                  </div>
+
+                  <!-- 2. Bancolombia -->
+                  <div class="bank-detail-card">
+                    <div class="card-head">
+                      <span class="bank-name">🏦 BANCOLOMBIA</span>
+                      <span class="bank-type">Cuenta {{ storeConfigService.config().bankTransfer?.accountType || 'Ahorros' }}</span>
+                    </div>
+                    <div class="card-data">
+                      <span class="data-label">Número de Cuenta:</span>
+                      <span class="data-val">{{ storeConfigService.config().bankTransfer?.accountNumber || '300-123456-78' }}</span>
+                      <span class="data-sub">Titular: <strong>{{ storeConfigService.config().bankTransfer?.accountHolder || 'Daniela Mejía — MOUTII' }}</strong></span>
+                      <span class="data-sub">{{ storeConfigService.config().bankTransfer?.holderId || 'CC 1.020.304.506' }}</span>
+                    </div>
+                    <button
+                      type="button"
+                      class="btn-copy"
+                      [class.copied]="copiedKey() === 'bancolombia'"
+                      (click)="copyToClipboard(cleanNumber(storeConfigService.config().bankTransfer?.accountNumber || '30012345678'), 'bancolombia')"
+                    >
+                      {{ copiedKey() === 'bancolombia' ? '✔ ¡Cuenta Copiada!' : 'Copiar Cuenta 📋' }}
+                    </button>
+                  </div>
+
+                  <!-- 3. Nequi & Daviplata -->
+                  <div class="bank-detail-card">
+                    <div class="card-head">
+                      <span class="bank-name">🟣 NEQUI / DAVIPLATA</span>
+                      <span class="bank-type">Billeteras Digitales</span>
+                    </div>
+                    <div class="card-data">
+                      <span class="data-label">Nequi:</span>
+                      <span class="data-val">{{ storeConfigService.config().bankTransfer?.nequiPhone || '300 123 4567' }}</span>
+                      <button
+                        type="button"
+                        class="btn-copy btn-copy-sm"
+                        [class.copied]="copiedKey() === 'nequi'"
+                        (click)="copyToClipboard(cleanNumber(storeConfigService.config().bankTransfer?.nequiPhone || '3001234567'), 'nequi')"
+                      >
+                        {{ copiedKey() === 'nequi' ? '✔ ¡Copiado!' : 'Copiar Nequi 📋' }}
+                      </button>
+                      @if (storeConfigService.config().bankTransfer?.daviplataPhone) {
+                        <div class="mt-2">
+                          <span class="data-label">Daviplata:</span>
+                          <span class="data-val">{{ storeConfigService.config().bankTransfer?.daviplataPhone }}</span>
+                          <button
+                            type="button"
+                            class="btn-copy btn-copy-sm"
+                            [class.copied]="copiedKey() === 'daviplata'"
+                            (click)="copyToClipboard(cleanNumber(storeConfigService.config().bankTransfer?.daviplataPhone || '3001234567'), 'daviplata')"
+                          >
+                            {{ copiedKey() === 'daviplata' ? '✔ ¡Copiado!' : 'Copiar Daviplata 📋' }}
+                          </button>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </div>
+
+                <div class="payment-steps-banner">
+                  <div class="step-item">
+                    <span class="step-number">1</span>
+                    <span>Copia los datos de tu cuenta o Llave preferida</span>
+                  </div>
+                  <div class="step-arrow">&rarr;</div>
+                  <div class="step-item">
+                    <span class="step-number">2</span>
+                    <span>Transfiere el valor total (${{ cartService.total() | number:'1.0-0' }} COP)</span>
+                  </div>
+                  <div class="step-arrow">&rarr;</div>
+                  <div class="step-item">
+                    <span class="step-number">3</span>
+                    <span>Confirma tu pedido y adjunta el pantallazo en WhatsApp</span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Order Summary Sidebar -->
+        <div class="checkout-summary-panel">
+          <div class="summary-card">
+            <h3 class="summary-title">Resumen de Compra</h3>
+
+            <div class="summary-items">
+              @for (item of cartService.items(); track item.id) {
+                <div class="checkout-item">
+                  <img [src]="item.product.images[0] || 'logo.png'" [alt]="item.product.title" class="checkout-thumb" />
+                  <div class="checkout-item-info">
+                    <h4>{{ item.product.title }}</h4>
+                    <span>Talla: {{ item.size }} | Cant: {{ item.quantity }}</span>
+                    <strong>${{ (item.unitPrice * item.quantity) | number:'1.0-0' }} COP</strong>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <div class="summary-calc">
+              <div class="calc-row">
+                <span>Subtotal</span>
+                <span>${{ cartService.subtotal() | number:'1.0-0' }} COP</span>
+              </div>
+              @if (cartService.discountAmount() > 0) {
+                <div class="calc-row discount-row">
+                  <span>Descuento aplicado</span>
+                  <span>-${{ cartService.discountAmount() | number:'1.0-0' }} COP</span>
+                </div>
+              }
+              <div class="calc-row">
+                <span>Costo de Envío</span>
+                <span class="free-shipping">Gratis</span>
+              </div>
+              <div class="calc-row total-calc-row">
+                <span>Total Final</span>
+                <span class="total-big">${{ cartService.total() | number:'1.0-0' }} COP</span>
+              </div>
+            </div>
+
+            @if (errorMessage) {
+              <div class="error-box animate-fade-in">
+                {{ errorMessage }}
+              </div>
+            }
+
+            <button
+              class="btn btn-whatsapp btn-lg submit-order-btn"
+              [disabled]="isSubmitting()"
+              (click)="submitOrder()"
+            >
+              @if (isSubmitting()) {
+                Procesando Pedido...
+              } @else if (paymentMethod === 'Transferencia Bancaria') {
+                Confirmar y Enviar Comprobante por WhatsApp 💬
+              } @else {
+                Confirmar Pedido por WhatsApp 💬
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,148 @@
+<div class="login-page">
+  <div class="container container-narrow">
+    @if (authService.isAuthenticated()) {
+      <div class="logged-in-card text-center animate-fade-in">
+        <span class="section-tag">Sesión Activa</span>
+        <h2 class="section-title">Hola, {{ authService.currentUser()?.name }}</h2>
+        <p class="user-role-badge">
+          Rol: <strong>{{ authService.currentUser()?.role === 'admin' ? 'Administrador' : 'Cliente' }}</strong>
+        </p>
+        <p class="user-email-text">{{ authService.currentUser()?.email }}</p>
+
+        <div class="logged-actions">
+          @if (authService.isAdmin()) {
+            <a routerLink="/admin" class="btn btn-black btn-lg">Ir al Panel de Administración &rarr;</a>
+          }
+          <a routerLink="/catalog" class="btn btn-beige btn-lg">Explorar Catálogo</a>
+          <button class="btn btn-outline-cafe btn-sm" (click)="authService.logout()">Cerrar Sesión</button>
+        </div>
+      </div>
+    } @else {
+      <div class="auth-card animate-fade-in">
+        <div class="auth-logo-box text-center">
+          <img src="logo.png" alt="MOUTII By Daniela Mejia" class="auth-logo" />
+          <p class="auth-tagline">Acceso exclusivo a la boutique y panel de gestión</p>
+        </div>
+
+        <!-- Tab switcher -->
+        <div class="auth-tabs">
+          <button
+            class="auth-tab"
+            [class.active]="activeTab() === 'login'"
+            (click)="activeTab.set('login')"
+          >
+            Iniciar Sesión
+          </button>
+          <button
+            class="auth-tab"
+            [class.active]="activeTab() === 'register'"
+            (click)="activeTab.set('register')"
+          >
+            Crear Cuenta
+          </button>
+        </div>
+
+        @if (errorMessage) {
+          <div class="alert-error animate-fade-in">
+            {{ errorMessage }}
+          </div>
+        }
+
+        @if (activeTab() === 'login') {
+          <!-- Login Form -->
+          <form (ngSubmit)="onLogin()" class="auth-form">
+            <div class="form-group">
+              <label class="form-label">Correo Electrónico</label>
+              <input
+                type="email"
+                [(ngModel)]="loginEmail"
+                name="loginEmail"
+                placeholder="ejemplo@mouti.com"
+                class="form-control"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Contraseña</label>
+              <input
+                type="password"
+                [(ngModel)]="loginPassword"
+                name="loginPassword"
+                placeholder="••••••••"
+                class="form-control"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              class="btn btn-black btn-lg submit-btn"
+              [disabled]="loading()"
+            >
+              {{ loading() ? 'Ingresando...' : 'Iniciar Sesión &rarr;' }}
+            </button>
+          </form>
+        } @else {
+          <!-- Register Form -->
+          <form (ngSubmit)="onRegister()" class="auth-form">
+            <div class="form-group">
+              <label class="form-label">Nombre Completo</label>
+              <input
+                type="text"
+                [(ngModel)]="registerData.name"
+                name="regName"
+                placeholder="Ej: Daniela Mejía"
+                class="form-control"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Correo Electrónico</label>
+              <input
+                type="email"
+                [(ngModel)]="registerData.email"
+                name="regEmail"
+                placeholder="correo@ejemplo.com"
+                class="form-control"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Teléfono</label>
+              <input
+                type="tel"
+                [(ngModel)]="registerData.phone"
+                name="regPhone"
+                placeholder="+57 (300) 123-4567"
+                class="form-control"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Contraseña (Mínimo 6 caracteres)</label>
+              <input
+                type="password"
+                [(ngModel)]="registerData.password"
+                name="regPass"
+                placeholder="••••••••"
+                class="form-control"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              class="btn btn-black btn-lg submit-btn"
+              [disabled]="loading()"
+            >
+              {{ loading() ? 'Creando cuenta...' : 'Crear Cuenta de Cliente &rarr;' }}
+            </button>
+          </form>
+        }
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,168 @@
+<div
+  class="product-card urban-card"
+  (mouseenter)="isHovered = true"
+  (mouseleave)="isHovered = false; activeImageIndex = 0"
+>
+  <div class="product-img-wrapper">
+    <a [routerLink]="['/product', product.slug || product._id]" class="img-link">
+      <img
+        [src]="currentImage"
+        [alt]="product.title"
+        class="product-img primary-img"
+        loading="lazy"
+      />
+      @if (secondaryImage) {
+        <img
+          [src]="secondaryImage"
+          [alt]="product.title"
+          class="product-img secondary-img"
+          loading="lazy"
+        />
+      }
+    </a>
+
+    <!-- Top Floating Badges (Urban Pill Style) -->
+    <div class="badges-overlay">
+      @if (product.discountPercent && product.discountPercent > 0) {
+        <span class="urban-badge badge-sale">
+          <span class="sale-icon">⚡</span>
+          -{{ product.discountPercent }}%
+        </span>
+      }
+      @if (product.isFeatured) {
+        <span class="urban-badge badge-featured">Destacado</span>
+      }
+    </div>
+
+    <!-- Urban Carousel Navigation (Chevrons) -->
+    @if (product.images && product.images.length > 1) {
+      <button
+        type="button"
+        class="card-carousel-btn prev-card-btn"
+        (click)="prevImage($event)"
+        aria-label="Foto anterior"
+      >
+        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+      <button
+        type="button"
+        class="card-carousel-btn next-card-btn"
+        (click)="nextImage($event)"
+        aria-label="Foto siguiente"
+      >
+        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+
+      <!-- Minimalist Progress Lines/Dots -->
+      <div class="card-dots">
+        @for (img of product.images; track img; let i = $index) {
+          <span
+            class="card-dot"
+            [class.active]="isHovered && activeImageIndex === 0 ? i === 1 : activeImageIndex === i"
+          ></span>
+        }
+      </div>
+    }
+
+    <!-- Quick Action / Size Selector Overlay -->
+    <div class="quick-action-overlay">
+      @if (addedFeedback()) {
+        <div class="added-notification">
+          <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="3" fill="none">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span>¡En tu bolsa!</span>
+        </div>
+      } @else if (product.sizes && product.sizes.length > 1) {
+        <div class="quick-sizes-panel">
+          <span class="sizes-label">Tallas:</span>
+          <div class="sizes-pills-row">
+            @for (size of product.sizes; track size) {
+              <button
+                type="button"
+                class="size-pill-btn"
+                (click)="quickAdd(size, $event)"
+              >
+                {{ size }}
+              </button>
+            }
+          </div>
+        </div>
+      } @else {
+        <button
+          type="button"
+          class="urban-quick-btn"
+          (click)="quickAdd(undefined, $event)"
+        >
+          <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>Agregar a la bolsa</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="product-info">
+    <div class="info-top-row">
+      <span class="product-category">{{ product.category }}</span>
+      @if (product.gender && product.gender !== 'Unisex') {
+        <span class="gender-tag">{{ product.gender }}</span>
+      }
+    </div>
+
+    <h3 class="product-title">
+      <a [routerLink]="['/product', product.slug || product._id]">
+        {{ product.title }}
+      </a>
+    </h3>
+
+    <!-- Available Colors Preview (Fixed height slot) -->
+    <div class="color-dots-wrapper">
+      @if (product.colors && product.colors.length > 0) {
+        <div class="color-dots">
+          @for (col of product.colors; track col.name) {
+            @if (col && col.name && col.hex) {
+              <span
+                class="color-dot"
+                [style.background-color]="col.hex"
+                [title]="col.name"
+              ></span>
+            }
+          }
+        </div>
+      }
+    </div>
+
+    <div class="product-bottom-row">
+      <div class="product-prices">
+        @if (product.discountPrice && product.discountPrice > 0) {
+          <span class="price-discounted">${{ product.discountPrice | number:'1.0-0' }}</span>
+          <span class="price-original">${{ product.price | number:'1.0-0' }}</span>
+        } @else {
+          <span class="price-regular">${{ product.price | number:'1.0-0' }}</span>
+        }
+        <span class="currency-tag">COP</span>
+      </div>
+
+      <!-- Quick Add Icon Button for Mobile/Touch -->
+      <button
+        type="button"
+        class="mobile-quick-btn"
+        (click)="quickAdd(undefined, $event)"
+        aria-label="Agregar a la bolsa"
+      >
+        <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2.2" fill="none">
+          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <path d="M16 10a4 4 0 0 1-8 0"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>

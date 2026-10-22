@@ -1,0 +1,166 @@
+<div class="collections-page">
+  @if (slug() && currentCollection()) {
+    <!-- Single Collection Hero Banner -->
+    <div class="collection-header-banner">
+      <div class="banner-backdrop" [style.background-image]="'url(' + currentCollection()?.imageUrl + ')'"></div>
+      <div class="banner-overlay"></div>
+      
+      <div class="container banner-content">
+        <nav class="breadcrumb-nav">
+          <a routerLink="/">Inicio</a>
+          <span class="sep">/</span>
+          <a routerLink="/collections">Colecciones</a>
+          <span class="sep">/</span>
+          <span class="current">{{ currentCollection()?.title }}</span>
+        </nav>
+
+        <span class="collection-badge">Edición & Colección Moutii</span>
+        <h1 class="collection-title">{{ currentCollection()?.title }}</h1>
+        <p class="collection-desc">{{ currentCollection()?.description }}</p>
+      </div>
+    </div>
+
+    <div class="container collection-body">
+      <!-- Filter Bar (Gender Switcher & Sort) -->
+      <div class="collection-filter-bar">
+        <div class="filter-group gender-group">
+          <span class="filter-label">Sección:</span>
+          <div class="pills-row">
+            <button
+              type="button"
+              class="pill-btn"
+              [class.active]="selectedGender() === 'all'"
+              (click)="setGender('all')"
+            >
+              Todos
+            </button>
+            <button
+              type="button"
+              class="pill-btn"
+              [class.active]="selectedGender() === 'Mujer'"
+              (click)="setGender('Mujer')"
+            >
+              Mujer
+            </button>
+            <button
+              type="button"
+              class="pill-btn"
+              [class.active]="selectedGender() === 'Hombre'"
+              (click)="setGender('Hombre')"
+            >
+              Hombre
+            </button>
+          </div>
+        </div>
+
+        <div class="filter-group right-controls">
+          <span class="count-tag">
+            @if (loading()) {
+              Buscando piezas...
+            } @else {
+              {{ products().length }} {{ products().length === 1 ? 'pieza exclusiva' : 'piezas exclusivas' }}
+            }
+          </span>
+
+          <div class="sort-box">
+            <label for="col-sort" class="sort-label">Ordenar:</label>
+            <select
+              id="col-sort"
+              [(ngModel)]="currentSort"
+              (ngModelChange)="onSortChange()"
+              class="sort-select"
+            >
+              <option value="newest">Más recientes</option>
+              <option value="price-asc">Menor precio</option>
+              <option value="price-desc">Mayor precio</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      @if (loading()) {
+        <div class="collection-loading text-center py-5">
+          <div class="spinner"></div>
+          <p>Cargando piezas de la colección {{ currentCollection()?.title }}...</p>
+        </div>
+      } @else if (products().length > 0) {
+        <!-- Products Grid -->
+        <div class="collection-grid">
+          @for (prod of products(); track prod._id) {
+            <app-product-card [product]="prod"></app-product-card>
+          }
+        </div>
+      } @else {
+        <!-- Empty State -->
+        <div class="collection-empty">
+          <div class="empty-icon">✨</div>
+          <h2>No se encontraron piezas en esta selección</h2>
+          <p>Estamos preparando nuevas piezas exclusivas para la colección {{ currentCollection()?.title }}. Puedes explorar nuestro catálogo general o consultar otra sección.</p>
+          <div class="empty-actions">
+            @if (selectedGender() !== 'all') {
+              <button class="btn btn-black" (click)="setGender('all')">Ver Todos (Hombre & Mujer)</button>
+            }
+            <a routerLink="/catalog" class="btn btn-outline">Ver Todo el Catálogo</a>
+          </div>
+        </div>
+      }
+
+      <!-- Sibling Collections Lookbook -->
+      @if (siblingCollections().length > 0) {
+        <div class="sibling-collections-section">
+          <div class="section-head text-center">
+            <span class="section-sub">Continúa Explorando</span>
+            <h2 class="section-title">Otras Colecciones Moutii</h2>
+          </div>
+
+          <div class="sibling-grid">
+            @for (item of siblingCollections(); track item.slug) {
+              <a [routerLink]="['/collections', item.slug]" class="sibling-card">
+                <div class="sibling-img-box">
+                  <img [src]="item.imageUrl" [alt]="item.title" loading="lazy" />
+                  <div class="sibling-overlay">
+                    <span>Ver Colección &rarr;</span>
+                  </div>
+                </div>
+                <h3 class="sibling-title">{{ item.title }}</h3>
+                <p class="sibling-desc">{{ item.description }}</p>
+              </a>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <!-- Directory View: /collections -->
+    <div class="all-collections-header">
+      <div class="container text-center">
+        <span class="section-sub">Editorial & Diseño</span>
+        <h1 class="main-title">Colecciones Moutii</h1>
+        <p class="main-subtitle">
+          Ediciones cápsula concebidas en lino orgánico, sastrería contemporánea y siluetas atemporales.
+        </p>
+      </div>
+    </div>
+
+    <div class="container py-5">
+      <div class="all-collections-grid">
+        @for (item of allActiveCollections(); track item.slug) {
+          <a [routerLink]="['/collections', item.slug]" class="collection-lookbook-card">
+            <div class="lookbook-img-wrapper">
+              <img [src]="item.imageUrl" [alt]="item.title" loading="lazy" />
+              <div class="lookbook-overlay">
+                <span class="btn btn-white btn-sm">Explorar {{ item.title }} &rarr;</span>
+              </div>
+            </div>
+            <div class="lookbook-info">
+              <h2 class="lookbook-title">{{ item.title }}</h2>
+              <p class="lookbook-desc">{{ item.description }}</p>
+              <span class="lookbook-link">Ver Colección Completa &rarr;</span>
+            </div>
+          </a>
+        }
+      </div>
+    </div>
+  }
+</div>

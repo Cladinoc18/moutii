@@ -1,0 +1,234 @@
+<header class="header">
+  <div class="container navbar-container">
+    <!-- Left: Mobile Toggle + Department Switcher (MUJER / HOMBRE) -->
+    <div class="nav-left">
+      <!-- Mobile Menu Toggle Button -->
+      <button class="mobile-toggle-btn" (click)="mobileMenuOpen.set(!mobileMenuOpen())" aria-label="Menú">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          @if (!mobileMenuOpen()) {
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+          } @else {
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+          }
+        </svg>
+      </button>
+
+      <!-- Header Department Switcher -->
+      <div class="dept-selector">
+        <button type="button" class="dept-link" [class.active]="isDeptActive('Mujer')"
+          (click)="selectDept('Mujer')">
+          MUJER
+        </button>
+        <span class="dept-divider">/</span>
+        <button type="button" class="dept-link" [class.active]="isDeptActive('Hombre')"
+          (click)="selectDept('Hombre')">
+          HOMBRE
+        </button>
+      </div>
+    </div>
+
+    <!-- Center: Brand Logo -->
+    <a routerLink="/" class="brand-logo-link">
+      <img src="logo.png" alt="MOUTII By Daniela Mejia" class="logo-img" />
+    </a>
+
+    <!-- Right: Navigation Links & Actions -->
+    <div class="nav-right">
+      <!-- Desktop Navigation Links -->
+      <nav class="nav-links desktop-only">
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link">Inicio</a>
+        <div class="nav-dropdown-item" (mouseenter)="openCollectionsDropdown()" (mouseleave)="closeCollectionsDropdown()">
+          <a
+            routerLink="/collections"
+            (click)="closeCollectionsDropdown()"
+            class="nav-link collections-trigger"
+            [class.active]="isColeccionesActive()"
+          >
+            Colecciones
+            <svg class="dropdown-chevron" [class.rotated]="collectionsDropdownOpen()" viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.2" fill="none">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </a>
+
+          <!-- Dropdown Mega Menu -->
+          @if (collectionsDropdownOpen()) {
+            <div
+              class="collections-mega-menu"
+              (mouseenter)="openCollectionsDropdown()"
+              (mouseleave)="closeCollectionsDropdown()"
+              (click)="$event.stopPropagation()"
+            >
+              <div class="mega-header">
+                <div class="mega-title-group">
+                  <span class="mega-tag">Editorial & Cápsulas</span>
+                  <span class="mega-heading">Colecciones Especiales</span>
+                </div>
+                <a routerLink="/collections" (click)="closeCollectionsDropdown(true)" class="mega-view-all">
+                  Ver Todas las Colecciones &rarr;
+                </a>
+              </div>
+
+              <div class="collections-cards-grid">
+                @for (col of activeCollections(); track col.slug) {
+                  <a [routerLink]="['/collections', col.slug]" (click)="closeCollectionsDropdown(true)" class="nav-col-card">
+                    <div class="col-img-wrap">
+                      <img [src]="col.imageUrl" [alt]="col.title" loading="lazy" />
+                      <div class="col-overlay">
+                        <span class="overlay-pill">Explorar &rarr;</span>
+                      </div>
+                    </div>
+                    <span class="col-card-title">{{ col.title }}</span>
+                  </a>
+                }
+              </div>
+            </div>
+          }
+        </div>
+        <a [routerLink]="['/catalog']" [queryParams]="{ onSale: true }"
+          [class.active]="isSaleActive()" class="nav-link sale-link">
+          Sale
+        </a>
+        <a routerLink="/orders" routerLinkActive="active" class="nav-link">
+          Tus Pedidos
+        </a>
+      </nav>
+
+      <!-- Action Icons (Search, User, Cart) -->
+      <div class="nav-actions">
+        <!-- Search trigger -->
+        <div class="search-box">
+          @if (searchOpen()) {
+          <div class="search-input-wrapper animate-fade-in">
+            <input type="text" [(ngModel)]="searchQuery" (keyup.enter)="executeSearch()"
+              placeholder="Buscar prendas de lino, blazers..." class="search-input" #searchInput />
+            <button class="icon-btn search-submit-btn" (click)="executeSearch()" aria-label="Buscar">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </button>
+          </div>
+          }
+          <button class="icon-btn" (click)="toggleSearch()" aria-label="Buscar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </button>
+        </div>
+
+        <!-- User / Admin Access -->
+        @if (authService.isAdmin()) {
+        <a routerLink="/admin" class="admin-badge-btn" title="Panel de Administración">
+          <span class="admin-dot"></span>
+          <span class="admin-label">Admin</span>
+        </a>
+        } @else if (authService.isAuthenticated()) {
+        <a routerLink="/login" class="icon-btn" title="Mi Cuenta">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </a>
+        } @else {
+        <a routerLink="/login" class="icon-btn" title="Iniciar Sesión">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </a>
+        }
+
+        <!-- Cart Button -->
+        <button class="icon-btn cart-btn" (click)="cartService.toggleCart()" aria-label="Carrito de compras">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+          @if (cartService.totalQuantity() > 0) {
+          <span class="cart-count-badge">{{ cartService.totalQuantity() }}</span>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Dropdown Navigation -->
+  @if (mobileMenuOpen()) {
+  <div class="mobile-menu-drawer animate-fade-in">
+    <!-- Mobile Department Switcher -->
+    <div class="mobile-dept-selector">
+      <button type="button" class="mobile-dept-btn" [class.active]="isDeptActive('Mujer')"
+        (click)="selectDept('Mujer')">
+        MUJER
+      </button>
+      <button type="button" class="mobile-dept-btn" [class.active]="isDeptActive('Hombre')"
+        (click)="selectDept('Hombre')">
+        HOMBRE
+      </button>
+    </div>
+
+    <nav class="mobile-nav-list">
+      <a routerLink="/" (click)="mobileMenuOpen.set(false)" class="mobile-nav-item">Inicio</a>
+      <!-- Mobile Colecciones Accordion -->
+      <div class="mobile-collections-group">
+        <div class="mobile-col-row flex-between">
+          <a
+            routerLink="/collections"
+            (click)="closeMobileMenu()"
+            class="mobile-nav-item mobile-collections-link"
+          >
+            Colecciones
+          </a>
+          <button
+            type="button"
+            class="mobile-chevron-btn"
+            (click)="mobileCollectionsOpen.update(v => !v)"
+            aria-label="Desplegar opciones de colecciones"
+          >
+            <span class="chevron-symbol">{{ mobileCollectionsOpen() ? '−' : '+' }}</span>
+          </button>
+        </div>
+
+        @if (mobileCollectionsOpen()) {
+          <div class="mobile-subcollections-list">
+            @for (col of activeCollections(); track col.slug) {
+              <a [routerLink]="['/collections', col.slug]" (click)="closeMobileMenu()" class="mobile-subcol-item">
+                <img [src]="col.imageUrl" [alt]="col.title" class="subcol-thumb" />
+                <div class="subcol-text">
+                  <strong class="subcol-title">{{ col.title }}</strong>
+                  <span class="subcol-link">/collections/{{ col.slug }}</span>
+                </div>
+              </a>
+            }
+            <a routerLink="/collections" (click)="closeMobileMenu()" class="mobile-subcol-all">
+              Ver Todas las Colecciones &rarr;
+            </a>
+          </div>
+        }
+      </div>
+      <a [routerLink]="['/catalog']" [queryParams]="{ onSale: true }"
+        (click)="mobileMenuOpen.set(false)" [class.active]="isSaleActive()" class="mobile-nav-item sale-item">
+        Promociones & Descuentos (Sale)
+      </a>
+      <a routerLink="/orders" (click)="mobileMenuOpen.set(false)" class="mobile-nav-item">
+        📦 Tus Pedidos
+      </a>
+      @if (authService.isAdmin()) {
+      <a routerLink="/admin" (click)="mobileMenuOpen.set(false)" class="mobile-nav-item admin-item">
+        ⚙ Panel de Administración MOUTII
+      </a>
+      } @else {
+      <a routerLink="/login" (click)="mobileMenuOpen.set(false)" class="mobile-nav-item">
+        Acceso de Clientes / Admin
+      </a>
+      }
+    </nav>
+  </div>
+  }
+</header>

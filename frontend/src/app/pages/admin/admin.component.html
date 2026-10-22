@@ -1,0 +1,1617 @@
+    <div class="admin-dashboard">
+      <!-- Admin Header Bar -->
+      <div class="admin-topbar">
+        <div class="container admin-topbar-content">
+          <div class="admin-brand-box">
+            <img src="logo.png" alt="MOUTII" class="admin-logo" />
+            <div class="admin-title-group">
+              <span class="admin-tag">Panel de Gestión</span>
+              <h1 class="admin-heading">MOUTII — By Daniela Mejía</h1>
+            </div>
+          </div>
+
+          <div class="admin-user-actions">
+            <div class="admin-user-info">
+              <span class="status-indicator"></span>
+              <span>{{ authService.currentUser()?.name }} (Admin)</span>
+            </div>
+            <a routerLink="/" class="btn btn-beige btn-sm">Ver Tienda &rarr;</a>
+            <button class="btn btn-outline btn-sm" (click)="logout()">Salir</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Dashboard Container -->
+      <div class="container admin-main">
+        <!-- Quick Stats Cards -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <span class="stat-num">{{ products().length }}</span>
+            <span class="stat-label">Prendas en Catálogo</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num">{{ discountedCount() }}</span>
+            <span class="stat-label">Prendas con Descuento</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num">{{ activeCouponsCount() }}</span>
+            <span class="stat-label">Cupones Activos</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num">{{ orders().length }}</span>
+            <span class="stat-label">Pedidos Recibidos</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num">{{ config()?.promoBanner?.discountPercent || 0 }}%</span>
+            <span class="stat-label">Descuento Global</span>
+          </div>
+        </div>
+
+        <!-- Dashboard Navigation Tabs -->
+        <div class="admin-nav-tabs">
+          <button
+            class="admin-tab-btn"
+            [class.active]="activeTab() === 'products'"
+            (click)="activeTab.set('products')"
+          >
+            👗 Catálogo de Ropa ({{ products().length }})
+          </button>
+          <button
+            class="admin-tab-btn"
+            [class.active]="activeTab() === 'categories'"
+            (click)="activeTab.set('categories')"
+          >
+            🏷️ Categorías ({{ categories().length }})
+          </button>
+          <button
+            class="admin-tab-btn"
+            [class.active]="activeTab() === 'coupons'"
+            (click)="activeTab.set('coupons')"
+          >
+            🎟️ Códigos de Descuento ({{ coupons().length }})
+          </button>
+          <button
+            class="admin-tab-btn"
+            [class.active]="activeTab() === 'store'"
+            (click)="activeTab.set('store')"
+          >
+            ✨ Textos, Imágenes y Descuentos
+          </button>
+          <button
+            class="admin-tab-btn"
+            [class.active]="activeTab() === 'orders'"
+            (click)="activeTab.set('orders')"
+          >
+            📦 Pedidos de Clientes ({{ orders().length }})
+          </button>
+        </div>
+
+        <!-- Global Toast Notification -->
+        @if (feedbackMessage()) {
+          <div class="feedback-toast animate-fade-in" [class.error]="feedbackError()">
+            {{ feedbackMessage() }}
+          </div>
+        }
+
+        <!-- TAB 1: PRODUCT CATALOG MANAGEMENT -->
+        @if (activeTab() === 'products') {
+          <div class="tab-content animate-fade-in">
+            <div class="section-actions-bar flex-between">
+              <div>
+                <h2 class="sub-title">Prendas y Descuentos</h2>
+                <p class="sub-desc">Agrega, edita precios, porcentajes de descuento y fotografías de tus colecciones.</p>
+              </div>
+              <button class="btn btn-black" (click)="openCreateProductModal()">
+                + Crear Nueva Prenda
+              </button>
+            </div>
+
+
+
+            <!-- Products Table -->
+            <div class="table-container">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Prenda</th>
+                    <th>Sección</th>
+                    <th>Categoría</th>
+                    <th>Precio Regular</th>
+                    <th>Descuento</th>
+                    <th>Stock</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (p of products(); track p._id) {
+                    <tr>
+                      <td class="product-cell">
+                        <img [src]="p.images[0] || 'logo.png'" [alt]="p.title" class="cell-thumb" />
+                        <div class="cell-info">
+                          <strong>{{ p.title }}</strong>
+                          <span class="cell-slug">{{ p.slug }}</span>
+                          @if (p.colors && p.colors.length > 0) {
+                            <div class="table-color-dots">
+                              @for (c of p.colors; track c.name) {
+                                <span class="table-color-dot" [style.backgroundColor]="c.hex" [title]="c.name"></span>
+                              }
+                            </div>
+                          }
+                        </div>
+                      </td>
+                      <td>
+                        <span class="dept-badge" [class.badge-mujer]="p.gender === 'Mujer'" [class.badge-hombre]="p.gender === 'Hombre'" [class.badge-ambos]="p.gender === 'Unisex'">
+                          {{ p.gender || 'Mujer' }}
+                        </span>
+                      </td>
+                      <td>{{ p.category }}</td>
+                      <td>\${{ p.price | number:'1.0-0' }} COP</td>
+                      <td>
+                        @if (p.discountPercent && p.discountPercent > 0) {
+                          <span class="badge badge-discount">
+                            -{{ p.discountPercent }}% (\${{ p.discountPrice | number:'1.0-0' }})
+                          </span>
+                        } @else {
+                          <span class="no-discount">Sin descuento</span>
+                        }
+                      </td>
+                      <td>
+                        <span [class.out-of-stock]="p.stock <= 3">{{ p.stock }} uds.</span>
+                      </td>
+                      <td>
+                        <span [class.active-pill]="p.isActive" [class.inactive-pill]="!p.isActive">
+                          {{ p.isActive ? 'Activo' : 'Inactivo' }}
+                        </span>
+                      </td>
+                      <td class="actions-cell">
+                        <button class="action-btn edit-btn" (click)="editProduct(p)" title="Editar">
+                          ✏
+                        </button>
+                        <button class="action-btn delete-btn" (click)="deleteProduct(p._id)" title="Eliminar">
+                          🗑
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+
+        <!-- TAB: CATEGORY MANAGEMENT -->
+        @if (activeTab() === 'categories') {
+          <div class="tab-content animate-fade-in">
+            <div class="section-actions-bar flex-between">
+              <div>
+                <h2 class="sub-title">Categorías del Catálogo</h2>
+                <p class="sub-desc">Crea nuevas categorías, edita sus nombres o elimina las que ya no uses. Se reflejarán de inmediato en los filtros de la tienda.</p>
+              </div>
+              <button class="btn btn-black" (click)="openCreateCategoryModal()">
+                + Nueva Categoría
+              </button>
+            </div>
+
+            <!-- Categories Table -->
+            <div class="table-container">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Nombre de Categoría</th>
+                    <th>Sección</th>
+                    <th>Identificador (Slug)</th>
+                    <th>Descripción</th>
+                    <th>Prendas Asociadas</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (cat of categories(); track cat._id) {
+                    <tr>
+                      <td>
+                        <strong>{{ cat.name }}</strong>
+                      </td>
+                      <td>
+                        <span class="dept-badge" [class.badge-mujer]="cat.gender === 'Mujer'" [class.badge-hombre]="cat.gender === 'Hombre'" [class.badge-ambos]="cat.gender === 'Ambos' || !cat.gender">
+                          {{ cat.gender || 'Ambos' }}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="cell-slug">{{ cat.slug }}</span>
+                      </td>
+                      <td>
+                        <span class="table-sub">{{ cat.description || 'Sin descripción' }}</span>
+                      </td>
+                      <td>
+                        <span class="badge" [class.badge-new]="(cat.productCount || 0) > 0">
+                          {{ cat.productCount || 0 }} prenda(s)
+                        </span>
+                      </td>
+                      <td>
+                        <span class="status-badge-active">
+                          Activa
+                        </span>
+                      </td>
+                      <td>
+                        <div class="row-actions">
+                          <button class="btn btn-outline btn-sm" (click)="editCategory(cat)">
+                            Editar
+                          </button>
+                          <button
+                            class="btn btn-outline-danger btn-sm"
+                            (click)="confirmDeleteCategory(cat)"
+                            [title]="(cat.productCount || 0) > 0 ? 'No se puede eliminar porque contiene prendas' : 'Eliminar categoría'"
+                          >
+                            Eliminar
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                  @if (categories().length === 0) {
+                    <tr>
+                      <td colspan="7" class="text-center py-4">
+                        No hay categorías registradas. Haz clic en "+ Nueva Categoría" para comenzar.
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+
+          </div>
+        }
+
+        <!-- TAB: COUPON MANAGEMENT -->
+        @if (activeTab() === 'coupons') {
+          <div class="tab-content animate-fade-in">
+            <div class="section-actions-bar flex-between">
+              <div>
+                <h2 class="sub-title">Códigos de Descuento y Promociones</h2>
+                <p class="sub-desc">Crea y administra códigos promocionales con su porcentaje de descuento, compra mínima y controla su activación. Los clientes podrán aplicarlos en la bolsa de compras.</p>
+              </div>
+              <button class="btn btn-black" (click)="openCreateCouponModal()">
+                + Crear Nuevo Cupón
+              </button>
+            </div>
+
+            <!-- Coupons Table -->
+            <div class="table-container">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Código Promocional</th>
+                    <th>% Descuento</th>
+                    <th>Descripción</th>
+                    <th>Compra Mínima</th>
+                    <th>Total Usos</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (c of coupons(); track c._id) {
+                    <tr>
+                      <td>
+                        <span class="coupon-code-badge">{{ c.code }}</span>
+                      </td>
+                      <td>
+                        <span class="badge badge-discount">{{ c.discountPercent }}% OFF</span>
+                      </td>
+                      <td>
+                        <span class="table-sub">{{ c.description || 'Sin descripción' }}</span>
+                      </td>
+                      <td>
+                        @if (c.minPurchase && c.minPurchase > 0) {
+                          <span class="min-purchase-tag">\${{ c.minPurchase | number:'1.0-0' }} COP</span>
+                        } @else {
+                          <span class="cell-slug">Sin mínimo</span>
+                        }
+                      </td>
+                      <td>
+                        <span class="badge badge-uses">{{ c.usageCount || 0 }} pedido(s)</span>
+                      </td>
+                      <td>
+                        <button
+                          type="button"
+                          class="status-toggle-pill"
+                          [class.active]="c.isActive"
+                          (click)="toggleCouponStatus(c)"
+                          [title]="c.isActive ? 'Clic para desactivar cupón' : 'Clic para activar cupón'"
+                        >
+                          <span class="toggle-dot"></span>
+                          {{ c.isActive ? 'Activo' : 'Inactivo' }}
+                        </button>
+                      </td>
+                      <td>
+                        <div class="row-actions">
+                          <button class="btn btn-outline btn-sm" (click)="editCoupon(c)">
+                            Editar
+                          </button>
+                          <button
+                            class="btn btn-outline-danger btn-sm"
+                            (click)="confirmDeleteCoupon(c)"
+                          >
+                            Eliminar
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                  @if (coupons().length === 0) {
+                    <tr>
+                      <td colspan="7" class="text-center py-4">
+                        No hay códigos de descuento registrados. Haz clic en "+ Crear Nuevo Cupón" para crear uno.
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+
+          </div>
+        }
+
+        <!-- TAB 2: STORE CUSTOMIZER (TEXTS, BANNERS, IMAGES, DISCOUNTS) -->
+        @if (activeTab() === 'store') {
+          <div class="tab-content animate-fade-in">
+            <div class="section-actions-bar flex-between">
+              <div>
+                <h2 class="sub-title">Personalización de Textos, Banners y Descuentos</h2>
+                <p class="sub-desc">Modifica los mensajes promocionales, imágenes de portada y textos editoriales que verán tus visitantes.</p>
+              </div>
+              <button class="btn btn-black btn-lg" (click)="saveStoreConfig()" [disabled]="isSavingConfig()">
+                {{ isSavingConfig() ? 'Guardando Cambios...' : 'Guardar Todos los Cambios' }}
+              </button>
+            </div>
+
+            @if (configForm) {
+              <div class="customizer-sections">
+                <!-- 1. Announcement Bar -->
+                <div class="admin-card">
+                  <div class="card-head flex-between">
+                    <h3>1. Barra Superior de Anuncios y Promociones</h3>
+                    <label class="toggle-control">
+                      <input type="checkbox" [(ngModel)]="configForm.announcementBar.isEnabled" />
+                      <span>Mostrar Barra</span>
+                    </label>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Texto del Anuncio</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="configForm.announcementBar.text"
+                      placeholder="✨ Envíos gratis por compras superiores a..."
+                      class="form-control"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Código de Descuento Promocional</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="configForm.announcementBar.discountCode"
+                      placeholder="MOUTII15"
+                      class="form-control"
+                    />
+                  </div>
+                </div>
+
+                <!-- 2. Carrusel de Banners Superiores (Arriba del Hero) -->
+                <div class="admin-card">
+                  <div class="card-head flex-between">
+                    <div>
+                      <h3>2. Carrusel de Banners Superiores (Arriba del Hero)</h3>
+                      <p class="card-sub-hint">Sube imágenes de banners que rotarán en el carrusel principal del inicio, con enlace de redirección al hacer clic.</p>
+                    </div>
+                    <span class="badge badge-uses">{{ configForm.topBanners?.length || 0 }} banner(s)</span>
+                  </div>
+
+                  <!-- Form to add new banner -->
+                  <div class="banner-creator-box">
+                    <h4 class="creator-title">+ Agregar Nuevo Banner al Carrusel</h4>
+                    <div class="form-row">
+                      <div class="form-group flex-2">
+                        <label class="form-label">Imagen del Banner *</label>
+                        <div class="image-upload-wrapper">
+                          <input
+                            type="text"
+                            [(ngModel)]="newBanner.imageUrl"
+                            placeholder="URL de la imagen o sube un archivo..."
+                            class="form-control"
+                          />
+                          <label class="btn btn-beige btn-sm file-upload-btn">
+                            <span>{{ isUploadingBanner() ? 'Subiendo...' : 'Subir Archivo' }}</span>
+                            <input type="file" (change)="onBannerImageUpload($event)" accept="image/*" [disabled]="isUploadingBanner()" />
+                          </label>
+                        </div>
+                      </div>
+                      <div class="form-group flex-1">
+                        <label class="form-label">Enlace de Redirección *</label>
+                        <input
+                          type="text"
+                          [(ngModel)]="newBanner.link"
+                          placeholder="Ej: /catalog o /catalog?category=Vestidos"
+                          class="form-control"
+                        />
+                      </div>
+                    </div>
+
+                    <div class="form-row">
+                      <div class="form-group flex-2">
+                        <label class="form-label">Título / Texto Descriptivo (Opcional)</label>
+                        <input
+                          type="text"
+                          [(ngModel)]="newBanner.title"
+                          placeholder="Ej: Colección Lino 2026 — Descubre piezas exclusivas"
+                          class="form-control"
+                        />
+                      </div>
+                      <div class="form-group flex-1 flex-end">
+                        <button
+                          type="button"
+                          class="btn btn-black w-100"
+                          (click)="addBanner()"
+                          [disabled]="!newBanner.imageUrl || isUploadingBanner()"
+                        >
+                          + Añadir al Carrusel
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Existing banners list -->
+                  @if (configForm.topBanners && configForm.topBanners.length > 0) {
+                    <div class="banner-items-list mt-3">
+                      <h4 class="creator-title">Banners Configurados en el Carrusel:</h4>
+                      @for (banner of configForm.topBanners; track $index) {
+                        <div class="banner-item-card flex-between" [class.inactive]="!banner.isActive">
+                          <div class="banner-preview-group">
+                            <span class="banner-order-num">#{{ $index + 1 }}</span>
+                            <img [src]="banner.imageUrl" alt="Banner" class="banner-thumb" />
+                            <div class="banner-info">
+                              <strong>{{ banner.title || 'Banner sin título' }}</strong>
+                              <span class="banner-link-hint">🔗 Redirecciona a: <code>{{ banner.link || '/catalog' }}</code></span>
+                            </div>
+                          </div>
+
+                          <div class="banner-actions-group">
+                            <button
+                              type="button"
+                              class="status-toggle-pill"
+                              [class.active]="banner.isActive"
+                              (click)="toggleBannerActive($index)"
+                              [title]="banner.isActive ? 'Banner visible' : 'Banner oculto'"
+                            >
+                              <span class="toggle-dot"></span>
+                              {{ banner.isActive ? 'Visible' : 'Oculto' }}
+                            </button>
+
+                            <button
+                              type="button"
+                              class="btn-icon"
+                              (click)="moveBanner($index, 'up')"
+                              [disabled]="$index === 0"
+                              title="Subir orden"
+                            >
+                              &uarr;
+                            </button>
+                            <button
+                              type="button"
+                              class="btn-icon"
+                              (click)="moveBanner($index, 'down')"
+                              [disabled]="$index === configForm.topBanners.length - 1"
+                              title="Bajar orden"
+                            >
+                              &darr;
+                            </button>
+                            <button
+                              type="button"
+                              class="btn-icon danger"
+                              (click)="removeBanner($index)"
+                              title="Eliminar banner"
+                            >
+                              &times;
+                            </button>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  } @else {
+                    <div class="empty-banners text-center py-4">
+                      <p>No hay banners configurados en el carrusel superior. Agrega uno arriba para mostrarlo en el Home.</p>
+                    </div>
+                  }
+                </div>
+
+                <!-- 3. Colecciones Especiales (Navbar Dropdown & URLs /collections/:slug) -->
+                <div class="admin-card">
+                  <div class="card-head flex-between">
+                    <div>
+                      <h3>3. Colecciones Especiales (Navbar & URLs /collections/:slug)</h3>
+                      <p class="card-sub-hint">Configura las colecciones fotográficas que se mostrarán con imágenes en el menú "Colecciones" del navbar y tendrán su propia URL exclusiva (ej: <code>/collections/bolsos</code>, <code>/collections/corazon-latino</code>).</p>
+                    </div>
+                    <span class="badge badge-uses">{{ configForm.collections?.length || 0 }} colección(es)</span>
+                  </div>
+
+                  <!-- Form to add new collection -->
+                  <div class="banner-creator-box">
+                    <h4 class="creator-title">+ Agregar Nueva Colección</h4>
+                    <div class="form-row">
+                      <div class="form-group flex-1">
+                        <label class="form-label">Título de la Colección *</label>
+                        <input
+                          type="text"
+                          [(ngModel)]="newCollection.title"
+                          (ngModelChange)="onCollectionTitleChange()"
+                          placeholder="Ej: Bolsos o Corazón Latino"
+                          class="form-control"
+                        />
+                      </div>
+                      <div class="form-group flex-1">
+                        <label class="form-label">Slug de la URL * (Ruta: /collections/slug)</label>
+                        <div class="input-prefix-wrapper">
+                          <input
+                            type="text"
+                            [(ngModel)]="newCollection.slug"
+                            placeholder="ej: bolsos, corazon-latino"
+                            class="form-control"
+                          />
+                        </div>
+                        <small class="text-muted">Se generará la URL: <code>/collections/{{ newCollection.slug || 'nombre' }}</code></small>
+                      </div>
+                    </div>
+
+                    <div class="form-row">
+                      <div class="form-group flex-2">
+                        <label class="form-label">Imagen Representativa de la Colección *</label>
+                        <div class="image-upload-wrapper">
+                          <input
+                            type="text"
+                            [(ngModel)]="newCollection.imageUrl"
+                            placeholder="URL de imagen o sube un archivo..."
+                            class="form-control"
+                          />
+                          <label class="btn btn-beige btn-sm file-upload-btn">
+                            <span>{{ isUploadingCollection() ? 'Subiendo...' : 'Subir Archivo' }}</span>
+                            <input type="file" (change)="onCollectionImageUpload($event)" accept="image/*" [disabled]="isUploadingCollection()" />
+                          </label>
+                        </div>
+                      </div>
+                      <div class="form-group flex-1">
+                        <label class="form-label">Categoría Asociada (Opcional)</label>
+                        <select [(ngModel)]="newCollection.category" class="form-control">
+                          <option value="">-- Sin categoría fija (búsqueda libre) --</option>
+                          <option value="Bolsos">Bolsos</option>
+                          <option value="Vestidos">Vestidos</option>
+                          <option value="Chaquetas & Blazers">Chaquetas & Blazers</option>
+                          <option value="Pantalones">Pantalones</option>
+                          <option value="Tops & Blusas">Tops & Blusas</option>
+                          <option value="Chalecos">Chalecos</option>
+                          <option value="Accesorios">Accesorios</option>
+                          <option value="Faldas">Faldas</option>
+                          <option value="Camisas & Polos">Camisas & Polos</option>
+                          @for (cat of categories(); track cat._id) {
+                            @if (!['Bolsos','Vestidos','Chaquetas & Blazers','Pantalones','Tops & Blusas','Chalecos','Accesorios','Faldas','Camisas & Polos'].includes(cat.name)) {
+                              <option [value]="cat.name">{{ cat.name }}</option>
+                            }
+                          }
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="form-row">
+                      <div class="form-group flex-2">
+                        <label class="form-label">Descripción Breve o Subtítulo (Opcional)</label>
+                        <input
+                          type="text"
+                          [(ngModel)]="newCollection.description"
+                          placeholder="Ej: Siluetas estructuradas y acabados nobles inspirados en el diseño latino."
+                          class="form-control"
+                        />
+                      </div>
+                      <div class="form-group flex-1">
+                        <label class="form-label">Palabra Clave de Búsqueda (Opcional)</label>
+                        <input
+                          type="text"
+                          [(ngModel)]="newCollection.searchQuery"
+                          placeholder="Ej: bolso, latino, lino"
+                          class="form-control"
+                        />
+                      </div>
+                    </div>
+
+                    <div class="form-row flex-end mt-2">
+                      <button
+                        type="button"
+                        class="btn btn-black"
+                        (click)="addCollection()"
+                        [disabled]="!newCollection.title || !newCollection.imageUrl || isUploadingCollection()"
+                      >
+                        + Añadir a la Lista de Colecciones
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Existing collections list -->
+                  @if (configForm.collections && configForm.collections.length > 0) {
+                    <div class="banner-items-list mt-3">
+                      <h4 class="creator-title">Colecciones Activas en la Tienda:</h4>
+                      @for (col of configForm.collections; track $index) {
+                        <div class="banner-item-card flex-between" [class.inactive]="!col.isActive">
+                          <div class="banner-preview-group">
+                            <span class="banner-order-num">#{{ $index + 1 }}</span>
+                            <img [src]="col.imageUrl" [alt]="col.title" class="banner-thumb" />
+                            <div class="banner-info">
+                              <strong>{{ col.title }}</strong>
+                              <span class="banner-link-hint">🔗 URL: <code>/collections/{{ col.slug }}</code></span>
+                              <small class="text-muted d-block">
+                                @if (col.category) {
+                                  Categoría: <strong>{{ col.category }}</strong>
+                                }
+                                @if (col.searchQuery) {
+                                  · Búsqueda: <em>"{{ col.searchQuery }}"</em>
+                                }
+                                @if (!col.category && !col.searchQuery) {
+                                  Filtro libre (todos los productos)
+                                }
+                              </small>
+                            </div>
+                          </div>
+
+                          <div class="banner-actions-group">
+                            <button
+                              type="button"
+                              class="status-toggle-pill"
+                              [class.active]="col.isActive"
+                              (click)="toggleCollectionActive($index)"
+                              [title]="col.isActive ? 'Colección visible' : 'Colección oculta'"
+                            >
+                              <span class="toggle-dot"></span>
+                              {{ col.isActive ? 'Visible' : 'Oculta' }}
+                            </button>
+
+                            <button
+                              type="button"
+                              class="btn-icon"
+                              (click)="moveCollection($index, 'up')"
+                              [disabled]="$index === 0"
+                              title="Subir orden"
+                            >
+                              &uarr;
+                            </button>
+                            <button
+                              type="button"
+                              class="btn-icon"
+                              (click)="moveCollection($index, 'down')"
+                              [disabled]="$index === configForm.collections.length - 1"
+                              title="Bajar orden"
+                            >
+                              &darr;
+                            </button>
+                            <button
+                              type="button"
+                              class="btn-icon danger"
+                              (click)="removeCollection($index)"
+                              title="Eliminar colección"
+                            >
+                              &times;
+                            </button>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  } @else {
+                    <div class="empty-banners text-center py-4">
+                      <p>No hay colecciones configuradas. Agrega una arriba para que aparezca en el Navbar.</p>
+                    </div>
+                  }
+                </div>
+
+                <!-- 4. Hero Section -->
+                <div class="admin-card">
+                  <h3>4. Portada Principal (Hero)</h3>
+                  <div class="form-row">
+                    <div class="form-group flex-2">
+                      <label class="form-label">Título Principal</label>
+                      <input
+                        type="text"
+                        [(ngModel)]="configForm.hero.title"
+                        placeholder="MOUTII"
+                        class="form-control"
+                      />
+                    </div>
+                    <div class="form-group flex-2">
+                      <label class="form-label">Subtítulo / Autor</label>
+                      <input
+                        type="text"
+                        [(ngModel)]="configForm.hero.subtitle"
+                        placeholder="By Daniela Mejía"
+                        class="form-control"
+                      />
+                    </div>
+                    <div class="form-group flex-1">
+                      <label class="form-label">Etiqueta (Badge)</label>
+                      <input
+                        type="text"
+                        [(ngModel)]="configForm.hero.badgeText"
+                        placeholder="Colección 2026"
+                        class="form-control"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Descripción de Portada</label>
+                    <textarea
+                      [(ngModel)]="configForm.hero.description"
+                      rows="2"
+                      class="form-control"
+                    ></textarea>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group flex-1">
+                      <label class="form-label">Texto del Botón</label>
+                      <input
+                        type="text"
+                        [(ngModel)]="configForm.hero.buttonText"
+                        placeholder="Descubrir Colección"
+                        class="form-control"
+                      />
+                    </div>
+                    <div class="form-group flex-1">
+                      <label class="form-label">Enlace del Botón</label>
+                      <input
+                        type="text"
+                        [(ngModel)]="configForm.hero.buttonLink"
+                        placeholder="/catalog"
+                        class="form-control"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Imagen de Fondo del Hero</label>
+                    <div class="image-upload-wrapper">
+                      <input
+                        type="text"
+                        [(ngModel)]="configForm.hero.imageUrl"
+                        placeholder="URL de imagen"
+                        class="form-control"
+                      />
+                      <label class="btn btn-beige btn-sm file-upload-btn">
+                        <span>Subir Fondo</span>
+                        <input type="file" (change)="onHeroImageUpload($event)" accept="image/*" />
+                      </label>
+                    </div>
+                    @if (configForm.hero.imageUrl) {
+                      <div class="img-preview-box mt-2">
+                        <img [src]="configForm.hero.imageUrl" alt="Preview Hero" class="preview-hero-img" />
+                      </div>
+                    }
+                  </div>
+                </div>
+
+                <!-- 3. Seasonal Promo Banner -->
+                <div class="admin-card">
+                  <div class="card-head flex-between">
+                    <h3>3. Banner de Ofertas y Campañas de Temporada</h3>
+                    <label class="toggle-control">
+                      <input type="checkbox" [(ngModel)]="configForm.promoBanner.isEnabled" />
+                      <span>Mostrar Banner de Ofertas</span>
+                    </label>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group flex-2">
+                      <label class="form-label">Título de la Campaña</label>
+                      <input
+                        type="text"
+                        [(ngModel)]="configForm.promoBanner.title"
+                        placeholder="Especial de Temporada"
+                        class="form-control"
+                      />
+                    </div>
+                    <div class="form-group flex-1">
+                      <label class="form-label">% Descuento Destacado</label>
+                      <input
+                        type="number"
+                        [(ngModel)]="configForm.promoBanner.discountPercent"
+                        placeholder="25"
+                        class="form-control"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Subtítulo / Condiciones</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="configForm.promoBanner.subtitle"
+                      placeholder="Hasta 25% de descuento en piezas seleccionadas..."
+                      class="form-control"
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Imagen del Banner Promocional</label>
+                    <div class="image-upload-wrapper">
+                      <input
+                        type="text"
+                        [(ngModel)]="configForm.promoBanner.imageUrl"
+                        class="form-control"
+                      />
+                      <label class="btn btn-beige btn-sm file-upload-btn">
+                        <span>Subir Imagen</span>
+                        <input type="file" (change)="onPromoImageUpload($event)" accept="image/*" />
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 4. Brand Story -->
+                <div class="admin-card">
+                  <h3>4. Manifiesto & Cita de Daniela Mejía</h3>
+                  <div class="form-group">
+                    <label class="form-label">Título del Manifiesto</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="configForm.brandStory.title"
+                      class="form-control"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Texto de la Historia</label>
+                    <textarea
+                      [(ngModel)]="configForm.brandStory.text"
+                      rows="4"
+                      class="form-control"
+                    ></textarea>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group flex-2">
+                      <label class="form-label">Cita Textual</label>
+                      <input
+                        type="text"
+                        [(ngModel)]="configForm.brandStory.quote"
+                        class="form-control"
+                      />
+                    </div>
+                    <div class="form-group flex-1">
+                      <label class="form-label">Autor de la Cita</label>
+                      <input
+                        type="text"
+                        [(ngModel)]="configForm.brandStory.quoteAuthor"
+                        class="form-control"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Fotografía del Manifiesto / Fundadora</label>
+                    <div class="image-upload-wrapper">
+                      <input
+                        type="text"
+                        [(ngModel)]="configForm.brandStory.imageUrl"
+                        placeholder="URL de la imagen o sube un archivo..."
+                        class="form-control"
+                      />
+                      <label class="btn btn-beige btn-sm file-upload-btn">
+                        <span>{{ isUploadingBrandStory() ? 'Subiendo...' : 'Subir Foto' }}</span>
+                        <input
+                          type="file"
+                          (change)="onBrandStoryImageUpload($event)"
+                          accept="image/*"
+                          [disabled]="isUploadingBrandStory()"
+                        />
+                      </label>
+                    </div>
+                    @if (configForm.brandStory.imageUrl) {
+                      <div class="img-preview-box mt-2">
+                        <img
+                          [src]="configForm.brandStory.imageUrl"
+                          alt="Preview Manifiesto"
+                          class="preview-hero-img"
+                        />
+                      </div>
+                    }
+                  </div>
+                </div>
+
+                <!-- 5. Contact Info -->
+                <div class="admin-card">
+                  <h3>5. Información de Contacto y Boutique</h3>
+                  <div class="form-row">
+                    <div class="form-group flex-1">
+                      <label class="form-label">Correo de Contacto</label>
+                      <input
+                        type="email"
+                        [(ngModel)]="configForm.contact.email"
+                        class="form-control"
+                      />
+                    </div>
+                    <div class="form-group flex-1">
+                      <label class="form-label">Teléfono de Atención</label>
+                      <input
+                        type="text"
+                        [(ngModel)]="configForm.contact.phone"
+                        class="form-control"
+                      />
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group flex-1">
+                      <label class="form-label">Instagram Oficial</label>
+                      <input
+                        type="text"
+                        [(ngModel)]="configForm.contact.instagram"
+                        class="form-control"
+                      />
+                    </div>
+                    <div class="form-group flex-1">
+                      <label class="form-label">Ubicación</label>
+                      <input
+                        type="text"
+                        [(ngModel)]="configForm.contact.address"
+                        class="form-control"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 6. Bank Transfer & Pago con Llave Info -->
+                @if (configForm.bankTransfer) {
+                  <div class="admin-card">
+                    <div class="card-head flex justify-between items-center" style="margin-bottom: 16px;">
+                      <div>
+                        <h3>6. Datos Bancarios y Pago con Llave (Transferencias)</h3>
+                        <p class="section-desc" style="color: var(--mouti-text-secondary); font-size: 0.85rem; margin-top: 4px;">
+                          Configura las cuentas y Llave (Transfiya/Bre-B) que los clientes verán en el checkout para transferir y enviar comprobante.
+                        </p>
+                      </div>
+                      <label class="status-toggle-pill" [class.active]="configForm.bankTransfer.isEnabled" (click)="configForm.bankTransfer.isEnabled = !configForm.bankTransfer.isEnabled" style="cursor: pointer;">
+                        <span class="toggle-dot"></span>
+                        {{ configForm.bankTransfer.isEnabled ? 'Transferencias Activas' : 'Transferencias Desactivadas' }}
+                      </label>
+                    </div>
+
+                    <div class="form-row">
+                      <div class="form-group flex-1">
+                        <label class="form-label">Banco Principal</label>
+                        <input
+                          type="text"
+                          [(ngModel)]="configForm.bankTransfer.bankName"
+                          placeholder="Ej: Bancolombia"
+                          class="form-control"
+                        />
+                      </div>
+                      <div class="form-group flex-1">
+                        <label class="form-label">Tipo de Cuenta</label>
+                        <select [(ngModel)]="configForm.bankTransfer.accountType" class="form-control">
+                          <option value="Ahorros">Cuenta de Ahorros</option>
+                          <option value="Corriente">Cuenta Corriente</option>
+                        </select>
+                      </div>
+                      <div class="form-group flex-1">
+                        <label class="form-label">Número de Cuenta</label>
+                        <input
+                          type="text"
+                          [(ngModel)]="configForm.bankTransfer.accountNumber"
+                          placeholder="Ej: 123-456789-00"
+                          class="form-control"
+                        />
+                      </div>
+                    </div>
+
+                    <div class="form-row">
+                      <div class="form-group flex-1">
+                        <label class="form-label">Titular de la Cuenta</label>
+                        <input
+                          type="text"
+                          [(ngModel)]="configForm.bankTransfer.accountHolder"
+                          placeholder="Ej: MOUTII S.A.S o Nombre del Titular"
+                          class="form-control"
+                        />
+                      </div>
+                      <div class="form-group flex-1">
+                        <label class="form-label">NIT o Cédula Titular</label>
+                        <input
+                          type="text"
+                          [(ngModel)]="configForm.bankTransfer.holderId"
+                          placeholder="Ej: 901.234.567-8"
+                          class="form-control"
+                        />
+                      </div>
+                    </div>
+
+                    <div class="form-row">
+                      <div class="form-group flex-1">
+                        <label class="form-label">Número Llave (Transfiya / Bre-B)</label>
+                        <input
+                          type="text"
+                          [(ngModel)]="configForm.bankTransfer.llaveNumber"
+                          placeholder="Ej: 3001234567"
+                          class="form-control"
+                        />
+                        <span class="form-hint">Permite transferir sin costo desde cualquier banco colombiano (Bancolombia, Davivienda, etc.).</span>
+                      </div>
+                      <div class="form-group flex-1">
+                        <label class="form-label">Tipo de Llave</label>
+                        <input
+                          type="text"
+                          [(ngModel)]="configForm.bankTransfer.llaveType"
+                          placeholder="Ej: Celular, Cédula o Correo"
+                          class="form-control"
+                        />
+                      </div>
+                    </div>
+
+                    <div class="form-row">
+                      <div class="form-group flex-1">
+                        <label class="form-label">Nequi (Número de Teléfono)</label>
+                        <input
+                          type="text"
+                          [(ngModel)]="configForm.bankTransfer.nequiPhone"
+                          placeholder="Ej: 3001234567"
+                          class="form-control"
+                        />
+                      </div>
+                      <div class="form-group flex-1">
+                        <label class="form-label">Daviplata (Número de Teléfono)</label>
+                        <input
+                          type="text"
+                          [(ngModel)]="configForm.bankTransfer.daviplataPhone"
+                          placeholder="Ej: 3001234567"
+                          class="form-control"
+                        />
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label">Instrucciones Adicionales para el Cliente</label>
+                      <textarea
+                        [(ngModel)]="configForm.bankTransfer.instructions"
+                        rows="3"
+                        class="form-control"
+                        placeholder="Ej: Por favor envía tu comprobante en captura de pantalla al chat de WhatsApp oficial de MOUTII para despachar tu paquete."
+                      ></textarea>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        <!-- TAB 3: CUSTOMER ORDERS -->
+        @if (activeTab() === 'orders') {
+          <div class="tab-content animate-fade-in">
+            <div class="section-actions-bar">
+              <h2 class="sub-title">Pedidos de Clientes e Invitados</h2>
+              <p class="sub-desc">Consulta los pedidos realizados y actualiza su estado de entrega en tiempo real.</p>
+            </div>
+
+            @if (orders().length === 0) {
+              <div class="empty-orders text-center py-5">
+                <p>Aún no se han recibido pedidos. Cuando un cliente agregue prendas al carrito y finalice compra, aparecerán aquí.</p>
+              </div>
+            } @else {
+              <div class="table-container">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th># Orden</th>
+                      <th>Cliente</th>
+                      <th>Ciudad & Dirección</th>
+                      <th>Prendas Compradas</th>
+                      <th>Total</th>
+                      <th>Método de Pago</th>
+                      <th>Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (ord of orders(); track ord._id) {
+                      <tr>
+                        <td>
+                          <strong>{{ ord.orderNumber }}</strong>
+                          <span class="order-date">{{ ord.createdAt | date:'short' }}</span>
+                        </td>
+                        <td>
+                          <strong>{{ ord.customerName }}</strong>
+                          <span class="cell-slug">{{ ord.customerEmail }}</span>
+                          <span class="cell-slug">{{ ord.customerPhone }}</span>
+                        </td>
+                        <td>
+                          <strong>{{ ord.city }}</strong>
+                          <p class="table-sub">{{ ord.shippingAddress }}</p>
+                        </td>
+                        <td>
+                          <ul class="order-item-list">
+                            @for (item of ord.items; track item.productId) {
+                              <li>{{ item.quantity }}x {{ item.title }} ({{ item.size }})</li>
+                            }
+                          </ul>
+                        </td>
+                        <td>
+                          <strong>\${{ ord.total | number:'1.0-0' }} COP</strong>
+                          @if (ord.discount && ord.discount > 0) {
+                            <span class="table-discount">Descuento: -\${{ ord.discount | number:'1.0-0' }}</span>
+                          }
+                        </td>
+                        <td>{{ ord.paymentMethod }}</td>
+                        <td>
+                          <select
+                            [ngModel]="ord.status"
+                            (ngModelChange)="updateOrderStatus(ord._id, $event)"
+                            class="status-select"
+                            [class.status-payment-pending]="ord.status === 'Pendiente de Pago'"
+                            [class.status-payment-verified]="ord.status === 'Pago Verificado'"
+                            [class.status-pending]="ord.status === 'Pendiente'"
+                            [class.status-processing]="ord.status === 'En Preparación'"
+                            [class.status-shipped]="ord.status === 'Enviado'"
+                            [class.status-delivered]="ord.status === 'Entregado'"
+                            [class.status-cancelled]="ord.status === 'Cancelado'"
+                          >
+                            <option value="Pendiente de Pago">Pendiente de Pago</option>
+                            <option value="Pago Verificado">Pago Verificado</option>
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="En Preparación">En Preparación</option>
+                            <option value="Enviado">Enviado</option>
+                            <option value="Entregado">Entregado</option>
+                            <option value="Cancelado">Cancelado</option>
+                          </select>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        }
+      </div>
+      <!-- End of container admin-main -->
+
+      <!-- ========================================================================= -->
+      <!-- GLOBAL VIEWPORT MODALS (Independent of tab content, containers or tables) -->
+      <!-- ========================================================================= -->
+
+      <!-- 1. Product Form Modal -->
+      @if (showProductForm()) {
+        <div class="product-modal-backdrop" (click)="closeProductForm()">
+          <div class="product-modal-card animate-fade-in" (click)="$event.stopPropagation()">
+            <div class="modal-header flex-between">
+              <h3>{{ editingProductId() ? 'Editar Prenda' : 'Nueva Prenda Moutii' }}</h3>
+              <button class="modal-close" (click)="closeProductForm()">&times;</button>
+            </div>
+
+            <form (ngSubmit)="saveProduct()" class="modal-body">
+              <div class="form-row">
+                <div class="form-group flex-2">
+                  <label class="form-label">Título de la Prenda *</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="productForm.title"
+                    name="title"
+                    placeholder="Ej: Vestido Lino Moca Daniela"
+                    class="form-control"
+                    required
+                  />
+                </div>
+                <div class="form-group flex-1">
+                  <label class="form-label">Sección / Género *</label>
+                  <select
+                    [(ngModel)]="productForm.gender"
+                    name="gender"
+                    (change)="onProductGenderChange()"
+                    class="form-control"
+                    required
+                  >
+                    <option value="Mujer">Mujer</option>
+                    <option value="Hombre">Hombre</option>
+                    <option value="Unisex">Unisex</option>
+                  </select>
+                </div>
+                <div class="form-group flex-1">
+                  <label class="form-label">Categoría *</label>
+                  <select
+                    [(ngModel)]="productForm.category"
+                    name="category"
+                    class="form-control"
+                    required
+                  >
+                    @for (cat of availableCategoriesForProduct(); track cat._id) {
+                      <option [value]="cat.name">{{ cat.name }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Descripción & Materiales *</label>
+                <textarea
+                  [(ngModel)]="productForm.description"
+                  name="description"
+                  placeholder="Detalles de corte, fibra (100% lino orgánico) y estilo..."
+                  class="form-control"
+                  rows="3"
+                  required
+                ></textarea>
+              </div>
+
+              <!-- Pricing & Discounts -->
+              <div class="pricing-card-sub">
+                <h4>Precios y Ofertas</h4>
+                <div class="form-row">
+                  <div class="form-group flex-1">
+                    <label class="form-label">Precio Regular (COP) *</label>
+                    <input
+                      type="number"
+                      [(ngModel)]="productForm.price"
+                      name="price"
+                      (input)="calculateDiscountFromPercent()"
+                      class="form-control"
+                      required
+                    />
+                  </div>
+                  <div class="form-group flex-1">
+                    <label class="form-label">% Descuento (Opcional)</label>
+                    <input
+                      type="number"
+                      [(ngModel)]="productForm.discountPercent"
+                      name="discountPercent"
+                      (input)="calculateDiscountFromPercent()"
+                      placeholder="Ej: 20 para 20% OFF"
+                      class="form-control"
+                    />
+                  </div>
+                  <div class="form-group flex-1">
+                    <label class="form-label">Precio con Descuento (COP)</label>
+                    <input
+                      type="number"
+                      [(ngModel)]="productForm.discountPrice"
+                      name="discountPrice"
+                      (input)="calculatePercentFromPrice()"
+                      placeholder="Calculado auto"
+                      class="form-control"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sizes, Stock & Image -->
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label class="form-label">Tallas Disponibles (Separadas por comas)</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="productFormSizesInput"
+                    name="sizesInput"
+                    placeholder="XS, S, M, L, XL"
+                    class="form-control"
+                  />
+                </div>
+                <div class="form-group flex-1">
+                  <label class="form-label">Unidades en Stock *</label>
+                  <input
+                    type="number"
+                    [(ngModel)]="productForm.stock"
+                    name="stock"
+                    class="form-control"
+                    required
+                  />
+                </div>
+              </div>
+
+              <!-- Available Colors Section -->
+              <div class="form-group colors-form-group">
+                <div class="flex-between">
+                  <label class="form-label">Colores Disponibles de la Prenda</label>
+                  <span class="form-hint">{{ productFormColors.length }} color(es) registrado(s)</span>
+                </div>
+
+                <!-- Quick Presets Bar -->
+                <div class="color-presets-bar">
+                  <span class="presets-title">Sugeridos:</span>
+                  <div class="preset-chips-list">
+                    @for (preset of colorPresets; track preset.name) {
+                      <button
+                        type="button"
+                        class="preset-chip"
+                        (click)="addPresetColor(preset)"
+                        [title]="'Añadir ' + preset.name"
+                      >
+                        <span class="preset-chip-dot" [style.backgroundColor]="preset.hex"></span>
+                        {{ preset.name }}
+                      </button>
+                    }
+                  </div>
+                </div>
+
+                <!-- Current Configured Colors Badges -->
+                <div class="current-colors-container">
+                  @if (productFormColors.length === 0) {
+                    <span class="no-colors-msg">Sin colores específicos asignados. Elige uno sugerido o agrégalo con el selector.</span>
+                  } @else {
+                    <div class="color-pills-list">
+                      @for (col of productFormColors; track col.name; let i = $index) {
+                        <div class="color-tag-pill">
+                          <span class="pill-swatch" [style.backgroundColor]="col.hex"></span>
+                          <span class="pill-name">{{ col.name }}</span>
+                          <span class="pill-hex">{{ col.hex }}</span>
+                          <button
+                            type="button"
+                            class="pill-remove-btn"
+                            (click)="removeColor(i)"
+                            title="Eliminar color"
+                          >
+                            &times;
+                          </button>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+
+                <!-- Add Custom Color Row -->
+                <div class="color-add-row">
+                  <div class="color-picker-input-wrap" title="Seleccionar tono en selector">
+                    <input
+                      type="color"
+                      [(ngModel)]="newColorHex"
+                      name="newColorHex"
+                      class="native-color-picker"
+                    />
+                  </div>
+                  <input
+                    type="text"
+                    [(ngModel)]="newColorName"
+                    name="newColorName"
+                    placeholder="Nombre del color (ej: Terracota, Verde Oliva, Marfil)"
+                    class="form-control"
+                    (keyup.enter)="addColor()"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-beige btn-sm"
+                    (click)="addColor()"
+                    [disabled]="!newColorName.trim()"
+                  >
+                    + Añadir Color
+                  </button>
+                </div>
+              </div>
+
+              <!-- Gallery Images Upload or URL -->
+              <div class="form-group">
+                <div class="flex-between">
+                  <label class="form-label">Galería de Imágenes (Carrusel) *</label>
+                  <span class="form-hint">{{ productFormImages.length }} imagen(es) añadida(s)</span>
+                </div>
+                
+                <div class="image-upload-wrapper">
+                  <input
+                    type="text"
+                    [(ngModel)]="productFormUrlInput"
+                    name="urlImageInput"
+                    placeholder="Pega la URL de una imagen..."
+                    class="form-control"
+                    (keyup.enter)="addImageUrl()"
+                  />
+                  <button type="button" class="btn btn-beige btn-sm" (click)="addImageUrl()" [disabled]="!productFormUrlInput">
+                    + Añadir URL
+                  </button>
+                  <label class="btn btn-black btn-sm file-upload-btn">
+                    <span>{{ isUploadingImages() ? 'Subiendo...' : '📁 Subir Imágenes' }}</span>
+                    <input type="file" (change)="onProductImageUpload($event)" accept="image/*" multiple [disabled]="isUploadingImages()" />
+                  </label>
+                </div>
+
+                <span class="form-hint mt-1 d-block">
+                  Puedes seleccionar múltiples fotos a la vez desde tu equipo. La primera imagen (★ Principal) será la portada.
+                </span>
+
+                @if (productFormImages.length > 0) {
+                  <div class="gallery-preview-grid">
+                    @for (img of productFormImages; track img; let i = $index) {
+                      <div class="gallery-preview-card" [class.is-primary]="i === 0">
+                        <img [src]="img" [alt]="'Foto ' + (i + 1)" class="preview-img-thumb" />
+                        <div class="gallery-item-footer">
+                          @if (i === 0) {
+                            <span class="primary-tag">★ Principal</span>
+                          } @else {
+                            <button type="button" class="btn-set-primary" (click)="setPrimaryImage(i)">
+                              Hacer Principal
+                            </button>
+                          }
+                          <button type="button" class="btn-remove-img" (click)="removeProductImage(i)" title="Eliminar imagen">
+                            ✕
+                          </button>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+
+              <div class="form-checkboxes">
+                <label class="checkbox-label">
+                  <input type="checkbox" [(ngModel)]="productForm.isFeatured" name="isFeatured" />
+                  <span>Destacar en página principal</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" [(ngModel)]="productForm.isActive" name="isActive" />
+                  <span>Visible en tienda</span>
+                </label>
+              </div>
+
+              <div class="modal-footer flex-between">
+                <button type="button" class="btn btn-outline btn-sm" (click)="closeProductForm()">Cancelar</button>
+                <button type="submit" class="btn btn-black" [disabled]="isSavingProduct()">
+                  {{ isSavingProduct() ? 'Guardando...' : (editingProductId() ? 'Actualizar Prenda' : 'Publicar Prenda') }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      }
+
+      <!-- 2. Category Modal -->
+      @if (showCategoryModal()) {
+        <div class="product-modal-backdrop" (click)="closeCategoryModal()">
+          <div class="product-modal-card category-modal-card animate-fade-in" (click)="$event.stopPropagation()">
+            <div class="modal-header flex-between">
+              <h3>{{ editingCategoryId() ? 'Editar Categoría' : 'Nueva Categoría Moutii' }}</h3>
+              <button class="modal-close" (click)="closeCategoryModal()">&times;</button>
+            </div>
+
+            <form (ngSubmit)="saveCategory()" class="modal-body">
+              <div class="form-group">
+                <label class="form-label">Nombre de la Categoría *</label>
+                <input
+                  type="text"
+                  [(ngModel)]="categoryForm.name"
+                  name="categoryName"
+                  placeholder="Ej: Conjuntos & Sets"
+                  class="form-control"
+                  required
+                  maxlength="50"
+                />
+                <small class="form-hint">Este nombre se mostrará en los filtros del catálogo y en la ficha de cada prenda.</small>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Sección / Género *</label>
+                <select
+                  [(ngModel)]="categoryForm.gender"
+                  name="categoryGender"
+                  class="form-control"
+                  required
+                >
+                  <option value="Ambos">Ambos (Hombre y Mujer)</option>
+                  <option value="Mujer">Solo Mujer</option>
+                  <option value="Hombre">Solo Hombre</option>
+                </select>
+                <small class="form-hint">Define si esta categoría estará disponible en la sección de Mujer, Hombre o en ambas.</small>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Descripción (Opcional)</label>
+                <textarea
+                  [(ngModel)]="categoryForm.description"
+                  name="categoryDescription"
+                  placeholder="Detalles sobre las prendas que pertenecen a esta categoría..."
+                  class="form-control"
+                  rows="3"
+                  maxlength="200"
+                ></textarea>
+              </div>
+
+              <div class="modal-footer flex-between">
+                <button type="button" class="btn btn-outline" (click)="closeCategoryModal()">
+                  Cancelar
+                </button>
+                <button type="submit" class="btn btn-black" [disabled]="isSavingCategory()">
+                  {{ isSavingCategory() ? 'Guardando...' : (editingCategoryId() ? 'Guardar Cambios' : 'Crear Categoría') }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      }
+
+      <!-- 3. Coupon Modal -->
+      @if (showCouponModal()) {
+        <div class="product-modal-backdrop" (click)="closeCouponModal()">
+          <div class="product-modal-card coupon-modal-card animate-fade-in" (click)="$event.stopPropagation()">
+            <div class="modal-header flex-between">
+              <h3>{{ editingCouponId() ? 'Editar Cupón de Descuento' : 'Nuevo Cupón de Descuento Moutii' }}</h3>
+              <button class="modal-close" (click)="closeCouponModal()">&times;</button>
+            </div>
+
+            <form (ngSubmit)="saveCoupon()" class="modal-body">
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label class="form-label">Código del Cupón *</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="couponForm.code"
+                    name="couponCode"
+                    placeholder="Ej: VERANO25, DANIELA30"
+                    class="form-control uppercase-input"
+                    required
+                    maxlength="25"
+                  />
+                  <small class="form-hint">Se convertirá automáticamente a mayúsculas sin espacios.</small>
+                </div>
+
+                <div class="form-group flex-1">
+                  <label class="form-label">% de Descuento (1 - 100) *</label>
+                  <input
+                    type="number"
+                    [(ngModel)]="couponForm.discountPercent"
+                    name="couponPercent"
+                    min="1"
+                    max="100"
+                    placeholder="Ej: 20"
+                    class="form-control"
+                    required
+                  />
+                  <small class="form-hint">Porcentaje a descontar del subtotal del carrito.</small>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Compra Mínima en COP (Opcional, 0 = Sin mínimo)</label>
+                <input
+                  type="number"
+                  [(ngModel)]="couponForm.minPurchase"
+                  name="couponMinPurchase"
+                  min="0"
+                  step="10000"
+                  placeholder="Ej: 100000 (0 para aplicar en cualquier compra)"
+                  class="form-control"
+                />
+                <small class="form-hint">El descuento solo aplicará si el carrito alcanza este monto en COP.</small>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Descripción o Motivo (Opcional)</label>
+                <input
+                  type="text"
+                  [(ngModel)]="couponForm.description"
+                  name="couponDescription"
+                  placeholder="Ej: Descuento especial por temporada de verano"
+                  class="form-control"
+                  maxlength="120"
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="couponForm.isActive"
+                    name="couponIsActive"
+                  />
+                  <span><strong>Cupón Activo</strong> (Los clientes pueden usarlo inmediatamente en la bolsa de compras)</span>
+                </label>
+              </div>
+
+              <div class="modal-footer flex-between">
+                <button type="button" class="btn btn-outline" (click)="closeCouponModal()">
+                  Cancelar
+                </button>
+                <button type="submit" class="btn btn-black" [disabled]="isSavingCoupon()">
+                  {{ isSavingCoupon() ? 'Guardando...' : (editingCouponId() ? 'Guardar Cambios' : 'Crear Cupón') }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      }
+    </div>

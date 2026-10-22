@@ -1,0 +1,400 @@
+/* ==========================================================================
+   MOUTII | By Daniela Mejía — Design Tokens & Global Styles
+   Colores: Café, Negro y Beige
+   ========================================================================== */
+
+:root {
+  /* Brand Palette (Extraída del logo y concepto de lino contemporáneo) */
+  --mouti-bg: #FAF8F5;              /* Beige suave principal */
+  --mouti-surface: #FFFFFF;         /* Blanco puro de tarjetas */
+  --mouti-surface-beige: #F3EFEA;   /* Beige arena para secciones y cards */
+  --mouti-surface-sand: #EAE3D9;    /* Beige tostado */
+  
+  --mouti-black: #161413;           /* Negro carbón profundo */
+  --mouti-black-muted: #2B2825;     /* Negro suave */
+  
+  --mouti-cafe-dark: #38261A;       /* Café espresso oscuro */
+  --mouti-cafe: #4A3528;            /* Café cálido */
+  --mouti-cafe-light: #7A5C43;      /* Café avellana */
+  --mouti-latte: #A97B6D;           /* Tono exacto del logo MOUTII By Daniela Mejia */
+  --mouti-latte-soft: #C59F92;      /* Latte claro */
+  
+  --mouti-text-primary: #1C1917;    /* Texto principal negro suave */
+  --mouti-text-secondary: #57504B;  /* Texto secundario café cenizo */
+  --mouti-text-muted: #8E8379;      /* Texto atenuado */
+  
+  --mouti-border: #E8E0D5;          /* Borde fino beige */
+  --mouti-border-dark: #D4C5B5;     /* Borde más contrastante */
+  
+  --mouti-danger: #C0392B;
+  --mouti-success: #3D6A4B;
+  
+  /* Typography */
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  
+  /* Shadows & Transitions */
+  --shadow-sm: 0 2px 8px rgba(35, 25, 18, 0.04);
+  --shadow-md: 0 8px 24px rgba(35, 25, 18, 0.08);
+  --shadow-lg: 0 16px 36px rgba(35, 25, 18, 0.12);
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --transition-fast: all 0.2s ease;
+  --transition-normal: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--mouti-bg);
+  color: var(--mouti-text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, .font-serif {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--mouti-black);
+}
+
+p {
+  color: var(--mouti-text-secondary);
+  font-size: 0.95rem;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+}
+
+/* Layout Utilities */
+.container {
+  width: 100%;
+  max-width: 1320px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 24px;
+  padding-right: 24px;
+
+  @media (max-width: 600px) {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+.container-narrow {
+  max-width: 960px;
+}
+
+/* Typography styles */
+.section-tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--mouti-latte);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  line-height: 1.2;
+  margin-bottom: 12px;
+  color: var(--mouti-black);
+  
+  @media (max-width: 768px) {
+    font-size: 1.85rem;
+  }
+}
+
+.section-desc {
+  font-size: 1.05rem;
+  max-width: 620px;
+  color: var(--mouti-text-secondary);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 28px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 0px; /* Minimalist sharp luxury edges */
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: var(--transition-normal);
+  line-height: 1;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn-black {
+  background-color: var(--mouti-black);
+  color: #FFFFFF;
+  border-color: var(--mouti-black);
+
+  &:hover:not(:disabled) {
+    background-color: var(--mouti-cafe);
+    border-color: var(--mouti-cafe);
+    color: #FFFFFF;
+  }
+}
+
+.btn-cafe {
+  background-color: var(--mouti-cafe);
+  color: #FFFFFF;
+  border-color: var(--mouti-cafe);
+
+  &:hover:not(:disabled) {
+    background-color: var(--mouti-black);
+    border-color: var(--mouti-black);
+  }
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--mouti-black);
+  border-color: var(--mouti-black);
+
+  &:hover:not(:disabled) {
+    background-color: var(--mouti-black);
+    color: #FFFFFF;
+  }
+}
+
+.btn-outline-cafe {
+  background-color: transparent;
+  color: var(--mouti-cafe);
+  border-color: var(--mouti-cafe);
+
+  &:hover:not(:disabled) {
+    background-color: var(--mouti-cafe);
+    color: #FFFFFF;
+  }
+}
+
+.btn-beige {
+  background-color: var(--mouti-surface-beige);
+  color: var(--mouti-cafe-dark);
+  border-color: var(--mouti-border);
+
+  &:hover:not(:disabled) {
+    background-color: var(--mouti-surface-sand);
+  }
+}
+
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 0.78rem;
+}
+
+.btn-lg {
+  padding: 16px 36px;
+  font-size: 0.95rem;
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.badge-discount {
+  background-color: var(--mouti-latte);
+  color: #FFFFFF;
+}
+
+.badge-new {
+  background-color: var(--mouti-black);
+  color: #FFFFFF;
+}
+
+.badge-status {
+  background-color: var(--mouti-surface-beige);
+  color: var(--mouti-cafe-dark);
+  border: 1px solid var(--mouti-border);
+}
+
+/* Forms */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--mouti-cafe-dark);
+  margin-bottom: 6px;
+}
+
+.form-control, .form-select {
+  width: 100%;
+  padding: 12px 16px;
+  background-color: #FFFFFF;
+  border: 1px solid var(--mouti-border);
+  color: var(--mouti-text-primary);
+  font-size: 0.92rem;
+  outline: none;
+  transition: var(--transition-fast);
+
+  &:focus {
+    border-color: var(--mouti-cafe);
+    box-shadow: 0 0 0 1px var(--mouti-cafe);
+  }
+
+  &::placeholder {
+    color: var(--mouti-text-muted);
+  }
+}
+
+textarea.form-control {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Universal Layout & Flex Utilities */
+.flex {
+  display: flex;
+}
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  width: 100%;
+
+  .flex-1 {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .flex-2 {
+    flex: 2 1 0;
+    min-width: 0;
+  }
+
+  .flex-3 {
+    flex: 3 1 0;
+    min-width: 0;
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0;
+
+    .flex-1, .flex-2, .flex-3 {
+      width: 100%;
+      flex: none;
+    }
+  }
+}
+
+.text-center {
+  text-align: center;
+}
+
+.py-4 {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.py-5 {
+  padding-top: 2.5rem;
+  padding-bottom: 2.5rem;
+}
+
+.mt-2 {
+  margin-top: 0.5rem;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.35s ease forwards;
+}
+
+/* Custom Minimalist Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--mouti-surface-beige);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--mouti-latte);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--mouti-cafe);
+}
