@@ -13,3 +13,14 @@ export interface AuthResponse {
   user: User;
 }
 
+export interface RegisterResponse {
+  requiresVerification: boolean;
+  email: string;
+  message: string;
+}
+
+export interface VerifyCodeData {
+  email: string;
+  code: string;
+}
+

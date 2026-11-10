@@ -16,14 +16,26 @@ export class UsersService {
     const existing = await this.userModel.findOne({
       email: userData.email?.toLowerCase(),
     });
-    if (existing) {
-      throw new ConflictException(
-        'El correo electrónico ya se encuentra registrado',
-      );
-    }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(userData.password!, salt);
+
+    if (existing) {
+      if (existing.isVerified) {
+        throw new ConflictException(
+          'El correo electrónico ya se encuentra registrado',
+        );
+      }
+      // Si el usuario existe pero no completó su verificación, actualizamos sus credenciales y código
+      existing.name = userData.name || existing.name;
+      existing.phone = userData.phone !== undefined ? userData.phone : existing.phone;
+      existing.password = hashedPassword;
+      existing.verificationCode = userData.verificationCode;
+      existing.verificationExpires = userData.verificationExpires;
+      existing.lastCodeSentAt = userData.lastCodeSentAt;
+      existing.isVerified = userData.isVerified ?? false;
+      return existing.save();
+    }
 
     const user = new this.userModel({
       ...userData,
@@ -44,6 +56,10 @@ export class UsersService {
       throw new NotFoundException('Usuario no encontrado');
     }
     return user;
+  }
+
+  async update(id: string, updates: Partial<User>): Promise<UserDocument | null> {
+    return this.userModel.findByIdAndUpdate(id, updates, { new: true }).exec();
   }
 
   async countAdmins(): Promise<number> {

@@ -25,6 +25,18 @@ export class User {
 
   @Prop({ default: '' })
   city?: string;
+
+  @Prop({ default: true })
+  isVerified!: boolean;
+
+  @Prop({ type: String, default: null })
+  verificationCode?: string | null;
+
+  @Prop({ type: Date, default: null })
+  verificationExpires?: Date | null;
+
+  @Prop({ type: Date, default: null })
+  lastCodeSentAt?: Date | null;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

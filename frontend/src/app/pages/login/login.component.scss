@@ -69,6 +69,116 @@
   font-size: 0.85rem;
   margin-bottom: 20px;
 }
+.alert-info {
+  background-color: #F8F5F0;
+  color: var(--mouti-cafe);
+  padding: 12px 16px;
+  border: 1px solid var(--mouti-border);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+/* Verification State Styles */
+.verify-header {
+  margin-bottom: 20px;
+}
+.verify-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 700;
+  color: var(--mouti-cafe);
+  background-color: var(--mouti-surface-beige);
+  padding: 4px 10px;
+  border-radius: 2px;
+  margin-bottom: 6px;
+}
+.verify-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--mouti-black);
+  margin: 0;
+}
+.verify-description {
+  font-size: 0.9rem;
+  color: var(--mouti-text-secondary);
+  line-height: 1.5;
+  margin-bottom: 24px;
+
+  strong {
+    color: var(--mouti-black);
+    word-break: break-all;
+  }
+}
+.code-input {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  text-align: center;
+  padding: 10px 14px;
+  border: 2px solid var(--mouti-border);
+  background: var(--mouti-surface-beige);
+  color: var(--mouti-black);
+  max-width: 260px;
+  margin: 0 auto;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:focus {
+    border-color: var(--mouti-cafe);
+    background: #FFFFFF;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(169, 123, 109, 0.15);
+  }
+}
+.verify-actions {
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid var(--mouti-border);
+}
+.resend-text {
+  font-size: 0.82rem;
+  color: var(--mouti-text-muted);
+  margin-bottom: 6px;
+}
+.btn-resend {
+  background: none;
+  border: none;
+  color: var(--mouti-cafe);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 12px;
+  transition: opacity 0.2s ease;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    color: var(--mouti-text-muted);
+  }
+
+  &:hover:not(:disabled) {
+    text-decoration: underline;
+  }
+}
+.verify-footer {
+  margin-top: 16px;
+}
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--mouti-text-muted);
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--mouti-black);
+    text-decoration: underline;
+  }
+}
 
 /* Logged in state */
 .logged-in-card {

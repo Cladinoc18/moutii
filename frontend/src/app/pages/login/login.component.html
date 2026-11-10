@@ -24,23 +24,37 @@
           <p class="auth-tagline">Acceso exclusivo a la boutique y panel de gestión</p>
         </div>
 
-        <!-- Tab switcher -->
-        <div class="auth-tabs">
-          <button
-            class="auth-tab"
-            [class.active]="activeTab() === 'login'"
-            (click)="activeTab.set('login')"
-          >
-            Iniciar Sesión
-          </button>
-          <button
-            class="auth-tab"
-            [class.active]="activeTab() === 'register'"
-            (click)="activeTab.set('register')"
-          >
-            Crear Cuenta
-          </button>
-        </div>
+        @if (activeTab() !== 'verify') {
+          <!-- Tab switcher -->
+          <div class="auth-tabs">
+            <button
+              class="auth-tab"
+              [class.active]="activeTab() === 'login'"
+              (click)="switchTab('login')"
+            >
+              Iniciar Sesión
+            </button>
+            <button
+              class="auth-tab"
+              [class.active]="activeTab() === 'register'"
+              (click)="switchTab('register')"
+            >
+              Crear Cuenta
+            </button>
+          </div>
+        } @else {
+          <!-- Header when verifying -->
+          <div class="verify-header text-center">
+            <span class="verify-badge">Seguridad MOUTII</span>
+            <h3 class="verify-title">Verifica tu Correo</h3>
+          </div>
+        }
+
+        @if (infoMessage) {
+          <div class="alert-info animate-fade-in">
+            {{ infoMessage }}
+          </div>
+        }
 
         @if (errorMessage) {
           <div class="alert-error animate-fade-in">
@@ -83,7 +97,7 @@
               {{ loading() ? 'Ingresando...' : 'Iniciar Sesión &rarr;' }}
             </button>
           </form>
-        } @else {
+        } @else if (activeTab() === 'register') {
           <!-- Register Form -->
           <form (ngSubmit)="onRegister()" class="auth-form">
             <div class="form-group">
@@ -140,6 +154,60 @@
             >
               {{ loading() ? 'Creando cuenta...' : 'Crear Cuenta de Cliente &rarr;' }}
             </button>
+          </form>
+        } @else if (activeTab() === 'verify') {
+          <!-- Verification Form -->
+          <form (ngSubmit)="onVerifyCode()" class="auth-form verify-form">
+            <p class="verify-description text-center">
+              Ingresa el código numérico de 6 dígitos que enviamos a tu correo electrónico:<br>
+              <strong>{{ verifyEmail }}</strong>
+            </p>
+
+            <div class="form-group text-center">
+              <label class="form-label">Código de Confirmación</label>
+              <input
+                type="text"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                maxlength="6"
+                [(ngModel)]="verifyCode"
+                name="verifyCodeInput"
+                placeholder="000000"
+                class="form-control code-input"
+                autocomplete="one-time-code"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              class="btn btn-black btn-lg submit-btn"
+              [disabled]="loading() || verifyCode.trim().length !== 6"
+            >
+              {{ loading() ? 'Validando...' : 'Confirmar y Activar Cuenta &rarr;' }}
+            </button>
+
+            <div class="verify-actions text-center">
+              <p class="resend-text">¿No recibiste el correo o ya expiró?</p>
+              <button
+                type="button"
+                class="btn-resend"
+                [disabled]="resendCooldown() > 0 || loading()"
+                (click)="onResendCode()"
+              >
+                @if (resendCooldown() > 0) {
+                  Reenviar código en {{ resendCooldown() }}s
+                } @else {
+                  Reenviar código de confirmación
+                }
+              </button>
+            </div>
+
+            <div class="verify-footer text-center">
+              <button type="button" class="btn-link" (click)="switchTab('login')">
+                &larr; Volver a Iniciar Sesión
+              </button>
+            </div>
           </form>
         }
       </div>

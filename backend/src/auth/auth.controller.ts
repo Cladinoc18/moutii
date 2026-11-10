@@ -9,6 +9,8 @@ import {
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
+import { ResendCodeDto } from './dto/resend-code.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { UserDocument } from '../users/schemas/user.schema';
@@ -25,6 +27,16 @@ export class AuthController {
   @Post('register')
   async register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
+  }
+
+  @Post('verify-code')
+  async verifyCode(@Body() verifyEmailDto: VerifyEmailDto) {
+    return this.authService.verifyCode(verifyEmailDto);
+  }
+
+  @Post('resend-code')
+  async resendCode(@Body() resendCodeDto: ResendCodeDto) {
+    return this.authService.resendCode(resendCodeDto);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -44,3 +56,4 @@ export class AuthController {
     };
   }
 }
+

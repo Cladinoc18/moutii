@@ -1,7 +1,7 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { tap, catchError, of, Observable } from 'rxjs';
-import { User, AuthResponse } from '../models/user.model';
+import { User, AuthResponse, RegisterResponse, VerifyCodeData } from '../models/user.model';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -19,6 +19,13 @@ export class AuthService {
     if (this.token()) {
       this.fetchProfile().subscribe();
     }
+  }
+
+  private handleAuthSuccess(res: AuthResponse): void {
+    localStorage.setItem('mouti_token', res.access_token);
+    localStorage.setItem('mouti_user', JSON.stringify(res.user));
+    this.token.set(res.access_token);
+    this.currentUser.set(res.user);
   }
 
   private getStoredToken(): string | null {
@@ -39,24 +46,27 @@ export class AuthService {
 
   login(credentials: { email: string; password: string }): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
-      tap((res) => {
-        localStorage.setItem('mouti_token', res.access_token);
-        localStorage.setItem('mouti_user', JSON.stringify(res.user));
-        this.token.set(res.access_token);
-        this.currentUser.set(res.user);
-      }),
+      tap((res) => this.handleAuthSuccess(res)),
     );
   }
 
-  register(userData: { name: string; email: string; password: string; phone?: string }): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, userData).pipe(
-      tap((res) => {
-        localStorage.setItem('mouti_token', res.access_token);
-        localStorage.setItem('mouti_user', JSON.stringify(res.user));
-        this.token.set(res.access_token);
-        this.currentUser.set(res.user);
-      }),
+  register(userData: {
+    name: string;
+    email: string;
+    password: string;
+    phone?: string;
+  }): Observable<RegisterResponse> {
+    return this.http.post<RegisterResponse>(`${this.apiUrl}/register`, userData);
+  }
+
+  verifyCode(data: VerifyCodeData): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/verify-code`, data).pipe(
+      tap((res) => this.handleAuthSuccess(res)),
     );
+  }
+
+  resendCode(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/resend-code`, { email });
   }
 
   fetchProfile(): Observable<User | null> {
