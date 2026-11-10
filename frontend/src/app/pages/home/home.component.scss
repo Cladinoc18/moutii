@@ -274,6 +274,7 @@
   color: var(--mouti-text-secondary);
   line-height: 1.7;
   margin-bottom: 32px;
+  white-space: pre-line;
 }
 .hero-actions {
   display: flex;
@@ -534,6 +535,7 @@
   line-height: 1.8;
   color: var(--mouti-text-secondary);
   margin-bottom: 28px;
+  white-space: pre-line;
 }
 .story-quote {
   border-left: 3px solid var(--mouti-latte);
@@ -545,6 +547,7 @@
     color: var(--mouti-black);
     line-height: 1.5;
     margin-bottom: 8px;
+    white-space: pre-line;
   }
   cite {
     font-family: var(--font-sans);

@@ -398,3 +398,11 @@ textarea.form-control {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--mouti-cafe);
 }
+
+/* Multiline text preservation */
+.pre-line,
+.preserve-lines,
+.multiline-text {
+  white-space: pre-line !important;
+}
+

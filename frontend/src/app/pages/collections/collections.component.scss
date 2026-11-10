@@ -99,6 +99,7 @@
     line-height: 1.6;
     color: rgba(255, 255, 255, 0.9);
     max-width: 680px;
+    white-space: pre-line;
   }
 }
 
@@ -472,6 +473,7 @@
       color: #666;
       line-height: 1.55;
       margin-bottom: 1.25rem;
+      white-space: pre-line;
     }
 
     .lookbook-link {
