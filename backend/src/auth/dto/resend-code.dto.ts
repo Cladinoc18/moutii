@@ -5,3 +5,4 @@ export class ResendCodeDto {
   @IsNotEmpty({ message: 'El correo electrónico es obligatorio' })
   email!: string;
 }
+

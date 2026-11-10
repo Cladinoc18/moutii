@@ -61,3 +61,4 @@ const oldTime = new Date(Date.now() - 65000); // 65s ago
 assert.strictEqual(checkResendCooldown(oldTime), true);
 
 console.log('✔ Auth email verification self-check passed successfully.');
+
