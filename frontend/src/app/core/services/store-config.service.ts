@@ -129,6 +129,8 @@ const DEFAULT_STORE_CONFIG: StoreConfig = {
       'Transfiere desde la app de cualquier banco usando tu Llave o a nuestra cuenta Bancolombia / Nequi, y adjunta el comprobante al confirmar por WhatsApp.',
     isEnabled: true,
   },
+  footerText:
+    'Prendas de autor con alma atemporal. Diseñadas en Colombia por Daniela Mejía para celebrar la elegancia, la autenticidad y la textura viva del lino.',
 };
 
 @Injectable({

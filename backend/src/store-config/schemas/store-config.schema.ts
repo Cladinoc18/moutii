@@ -237,6 +237,12 @@ export class StoreConfig {
 
   @Prop({ type: BankTransferConfigSchema, default: () => ({}) })
   bankTransfer!: BankTransferConfig;
+
+  @Prop({
+    default:
+      'Prendas de autor con alma atemporal. Diseñadas en Colombia por Daniela Mejía para celebrar la elegancia, la autenticidad y la textura viva del lino.',
+  })
+  footerText?: string;
 }
 
 export const StoreConfigSchema = SchemaFactory.createForClass(StoreConfig);

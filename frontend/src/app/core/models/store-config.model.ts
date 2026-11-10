@@ -81,5 +81,6 @@ export interface StoreConfig {
   promoBanner: PromoBannerConfig;
   contact: ContactConfig;
   bankTransfer?: BankTransferConfig;
+  footerText?: string;
 }
 

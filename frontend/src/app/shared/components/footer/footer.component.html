@@ -4,7 +4,7 @@
     <div class="footer-brand-col">
       <img src="logo.png" alt="MOUTII" class="footer-logo" />
       <p class="brand-text">
-        Prendas de autor con alma atemporal. Diseñadas en Colombia por Daniela Mejía para celebrar la elegancia, la autenticidad y la textura viva del lino.
+        {{ configService.config().footerText || 'Prendas de autor con alma atemporal. Diseñadas en Colombia por Daniela Mejía para celebrar la elegancia, la autenticidad y la textura viva del lino.' }}
       </p>
       <div class="social-links">
         <a [href]="configService.config().contact.instagram || '#'" target="_blank" class="social-link" title="Instagram">

@@ -60,6 +60,11 @@ export class StoreConfigService {
           'Hasta 25% de descuento en piezas seleccionadas de la colección.';
         needsSave = true;
       }
+      if (!config.footerText) {
+        config.footerText =
+          'Prendas de autor con alma atemporal. Diseñadas en Colombia por Daniela Mejía para celebrar la elegancia, la autenticidad y la textura viva del lino.';
+        needsSave = true;
+      }
 
       if (needsSave) {
         await config.save();

@@ -175,6 +175,10 @@ export class AdminComponent implements OnInit {
         if (!cloned.collections) {
           cloned.collections = [];
         }
+        if (!cloned.footerText) {
+          cloned.footerText =
+            'Prendas de autor con alma atemporal. Diseñadas en Colombia por Daniela Mejía para celebrar la elegancia, la autenticidad y la textura viva del lino.';
+        }
         this.configForm = cloned;
       },
     });
@@ -769,6 +773,10 @@ export class AdminComponent implements OnInit {
         }
         if (!cloned.collections) {
           cloned.collections = [];
+        }
+        if (!cloned.footerText) {
+          cloned.footerText =
+            'Prendas de autor con alma atemporal. Diseñadas en Colombia por Daniela Mejía para celebrar la elegancia, la autenticidad y la textura viva del lino.';
         }
         this.configForm = cloned;
         this.isSavingConfig.set(false);
