@@ -524,7 +524,7 @@ export class AdminComponent implements OnInit {
     if (files.length === 1) {
       this.productService.uploadImage(files[0]).subscribe({
         next: (res) => {
-          const fullUrl = `${environment.uploadsUrl}${res.url}`;
+          const fullUrl = this.resolveImageUrl(res.url);
           this.productFormImages.push(fullUrl);
           if (!this.productFormMainImage) {
             this.productFormMainImage = fullUrl;
@@ -542,7 +542,7 @@ export class AdminComponent implements OnInit {
       this.productService.uploadImages(files).subscribe({
         next: (resList) => {
           resList.forEach((item) => {
-            this.productFormImages.push(`${environment.uploadsUrl}${item.url}`);
+            this.productFormImages.push(this.resolveImageUrl(item.url));
           });
           if (!this.productFormMainImage && this.productFormImages.length > 0) {
             this.productFormMainImage = this.productFormImages[0];
@@ -682,7 +682,7 @@ export class AdminComponent implements OnInit {
 
     this.productService.uploadImage(file).subscribe({
       next: (res) => {
-        this.configForm.hero.imageUrl = `${environment.uploadsUrl}${res.url}`;
+        this.configForm.hero.imageUrl = this.resolveImageUrl(res.url);
         this.showToast('Imagen de Hero subida');
       },
       error: () => this.showToast('Error al subir imagen', true),
@@ -695,7 +695,7 @@ export class AdminComponent implements OnInit {
 
     this.productService.uploadImage(file).subscribe({
       next: (res) => {
-        this.configForm.promoBanner.imageUrl = `${environment.uploadsUrl}${res.url}`;
+        this.configForm.promoBanner.imageUrl = this.resolveImageUrl(res.url);
         this.showToast('Imagen de promo subida');
       },
       error: () => this.showToast('Error al subir imagen', true),
@@ -709,7 +709,7 @@ export class AdminComponent implements OnInit {
     this.isUploadingBrandStory.set(true);
     this.productService.uploadImage(file).subscribe({
       next: (res) => {
-        this.configForm.brandStory.imageUrl = `${environment.uploadsUrl}${res.url}`;
+        this.configForm.brandStory.imageUrl = this.resolveImageUrl(res.url);
         this.isUploadingBrandStory.set(false);
         this.showToast('Fotografía del manifiesto subida con éxito');
       },
@@ -766,7 +766,7 @@ export class AdminComponent implements OnInit {
     this.isUploadingBanner.set(true);
     this.productService.uploadImage(file).subscribe({
       next: (res) => {
-        this.newBanner.imageUrl = `${environment.uploadsUrl}${res.url}`;
+        this.newBanner.imageUrl = this.resolveImageUrl(res.url);
         this.isUploadingBanner.set(false);
         this.showToast('Imagen del banner subida con éxito');
       },
@@ -829,6 +829,13 @@ export class AdminComponent implements OnInit {
     this.newCollection.slug = this.slugify(this.newCollection.title);
   }
 
+  resolveImageUrl(url: string): string {
+    if (!url) return '';
+    return url.startsWith('http://') || url.startsWith('https://')
+      ? url
+      : `${environment.uploadsUrl}${url}`;
+  }
+
   private slugify(text: string): string {
     return text
       .toLowerCase()
@@ -845,7 +852,7 @@ export class AdminComponent implements OnInit {
     this.isUploadingCollection.set(true);
     this.productService.uploadImage(file).subscribe({
       next: (res) => {
-        this.newCollection.imageUrl = `${environment.uploadsUrl}${res.url}`;
+        this.newCollection.imageUrl = this.resolveImageUrl(res.url);
         this.isUploadingCollection.set(false);
         this.showToast('Imagen de la colección subida con éxito');
       },

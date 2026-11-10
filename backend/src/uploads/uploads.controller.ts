@@ -8,20 +8,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname, join } from 'path';
+import { memoryStorage } from 'multer';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { UploadsService } from './uploads.service';
 
-const storage = diskStorage({
-  destination: join(process.cwd(), 'uploads'),
-  filename: (req, file, callback) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    const ext = extname(file.originalname).toLowerCase();
-    callback(null, `mouti-${uniqueSuffix}${ext}`);
-  },
-});
+const storage = memoryStorage();
 
 type MulterFilterCallback = (error: Error | null, acceptFile: boolean) => void;
 
@@ -44,6 +37,8 @@ const imageFilter = (
 
 @Controller('uploads')
 export class UploadsController {
+  constructor(private readonly uploadsService: UploadsService) {}
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Post('single')
@@ -54,15 +49,11 @@ export class UploadsController {
       limits: { fileSize: 10 * 1024 * 1024 },
     }),
   )
-  uploadSingle(@UploadedFile() file: Express.Multer.File) {
+  async uploadSingle(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
       throw new BadRequestException('No se envió ningún archivo');
     }
-    return {
-      url: `/uploads/${file.filename}`,
-      filename: file.filename,
-      size: file.size,
-    };
+    return this.uploadsService.uploadFile(file);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -75,14 +66,12 @@ export class UploadsController {
       limits: { fileSize: 10 * 1024 * 1024 },
     }),
   )
-  uploadMultiple(@UploadedFiles() files: Express.Multer.File[]) {
+  async uploadMultiple(@UploadedFiles() files: Express.Multer.File[]) {
     if (!files || files.length === 0) {
       throw new BadRequestException('No se enviaron archivos');
     }
-    return files.map((file) => ({
-      url: `/uploads/${file.filename}`,
-      filename: file.filename,
-      size: file.size,
-    }));
+    return Promise.all(
+      files.map((file) => this.uploadsService.uploadFile(file)),
+    );
   }
 }
