@@ -16,7 +16,7 @@ import { Order } from '../../core/models/order.model';
 })
 export class OrdersComponent implements OnInit, OnDestroy {
   private orderService = inject(OrderService);
-  private authService = inject(AuthService);
+  authService = inject(AuthService);
   private route = inject(ActivatedRoute);
   storeConfigService = inject(StoreConfigService);
 

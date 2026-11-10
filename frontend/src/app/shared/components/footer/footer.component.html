@@ -40,8 +40,10 @@
     <div class="footer-col">
       <h4 class="col-title">Moutii Privé</h4>
       <ul class="col-list">
-        <li><a routerLink="/orders">📦 Rastrear Tus Pedidos</a></li>
-        <li><a routerLink="/login">Acceso de Clientes</a></li>
+        @if (authService.isAuthenticated()) {
+          <li><a routerLink="/orders">📦 Rastrear Tus Pedidos</a></li>
+        }
+        <li><a routerLink="/login">{{ authService.isAuthenticated() ? 'Mi Cuenta' : 'Acceso de Clientes' }}</a></li>
         <li><a routerLink="/admin">Portal de Administración</a></li>
         <li><span class="secure-badge">🔒 Compras 100% Protegidas</span></li>
       </ul>

@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { StoreConfigService } from '../../../core/services/store-config.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-footer',
@@ -12,4 +13,6 @@ import { StoreConfigService } from '../../../core/services/store-config.service'
 })
 export class FooterComponent {
   configService = inject(StoreConfigService);
+  authService = inject(AuthService);
 }
+

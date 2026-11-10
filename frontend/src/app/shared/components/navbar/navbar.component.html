@@ -92,9 +92,11 @@
           [class.active]="isSaleActive()" class="nav-link sale-link">
           Sale
         </a>
-        <a routerLink="/orders" routerLinkActive="active" class="nav-link">
-          Tus Pedidos
-        </a>
+        @if (authService.isAuthenticated()) {
+          <a routerLink="/orders" routerLinkActive="active" class="nav-link">
+            Tus Pedidos
+          </a>
+        }
       </nav>
 
       <!-- Action Icons (Search, User, Cart) -->
@@ -216,9 +218,11 @@
         (click)="mobileMenuOpen.set(false)" [class.active]="isSaleActive()" class="mobile-nav-item sale-item">
         Promociones & Descuentos (Sale)
       </a>
-      <a routerLink="/orders" (click)="mobileMenuOpen.set(false)" class="mobile-nav-item">
-        📦 Tus Pedidos
-      </a>
+      @if (authService.isAuthenticated()) {
+        <a routerLink="/orders" (click)="mobileMenuOpen.set(false)" class="mobile-nav-item">
+          📦 Tus Pedidos
+        </a>
+      }
       @if (authService.isAdmin()) {
       <a routerLink="/admin" (click)="mobileMenuOpen.set(false)" class="mobile-nav-item admin-item">
         ⚙ Panel de Administración MOUTII

@@ -10,7 +10,11 @@
       <span class="section-tag">Rastreo de Compras</span>
       <h1 class="orders-title">Tus Pedidos</h1>
       <p class="orders-subtitle">
-        Sigue el estado de preparación y entrega de tus prendas exclusivas en tiempo real.
+        @if (authService.currentUser()?.name) {
+          Hola <strong>{{ authService.currentUser()?.name }}</strong>, sigue el estado de preparación y entrega de tus prendas en tiempo real.
+        } @else {
+          Sigue el estado de preparación y entrega de tus prendas exclusivas en tiempo real.
+        }
       </p>
     </div>
 
@@ -261,9 +265,9 @@
     @if (!isLoading() && orders().length === 0) {
       <div class="empty-orders-card animate-fade-in text-center">
         <div class="empty-icon">📦</div>
-        <h3>No tienes pedidos activos guardados en este navegador</h3>
+        <h3>No tienes pedidos activos asociados a tu cuenta</h3>
         <p>
-          Si realizaste una compra recientemente, ingresa tu <strong>número de orden</strong> (ej: MOU-...) o tu <strong>correo electrónico</strong> en el buscador superior para rastrearla de inmediato.
+          Aún no tienes compras registradas con tu correo <strong>{{ authService.currentUser()?.email }}</strong>. Cuando realices un pedido, podrás seguir su preparación y despacho aquí en tiempo real.
         </p>
         <div class="empty-actions">
           <a routerLink="/catalog" class="btn btn-black btn-lg">Explorar Colección &rarr;</a>
