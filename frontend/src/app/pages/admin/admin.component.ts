@@ -296,6 +296,29 @@ export class AdminComponent implements OnInit {
     });
   }
 
+  moveCategory(index: number, direction: 'up' | 'down') {
+    const cats = [...this.categories()];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= cats.length) return;
+
+    // Intercambio optimista inmediato en la UI
+    const temp = cats[index];
+    cats[index] = cats[targetIndex];
+    cats[targetIndex] = temp;
+    this.categories.set(cats);
+
+    const ids = cats.map((c) => c._id);
+    this.categoryService.reorderCategories(ids).subscribe({
+      next: () => {
+        this.showToast('Orden de categorías actualizado');
+      },
+      error: (err) => {
+        this.loadCategories();
+        this.showToast(err?.error?.message || 'Error al actualizar el orden de categorías', true);
+      },
+    });
+  }
+
   // --- Coupon CRUD ---
   loadCoupons() {
     this.couponService.getAllAdminCoupons().subscribe({

@@ -22,5 +22,5 @@ export interface UpdateCategoryDto {
   description?: string;
   gender?: 'Mujer' | 'Hombre' | 'Ambos';
   isActive?: boolean;
+  order?: number;
 }
-

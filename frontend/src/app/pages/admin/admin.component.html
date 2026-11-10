@@ -198,6 +198,7 @@
               <table class="admin-table">
                 <thead>
                   <tr>
+                    <th style="width: 110px;">Orden</th>
                     <th>Nombre de Categoría</th>
                     <th>Sección</th>
                     <th>Identificador (Slug)</th>
@@ -210,6 +211,31 @@
                 <tbody>
                   @for (cat of categories(); track cat._id) {
                     <tr>
+                      <td>
+                        <div class="category-order-group">
+                          <span class="category-order-num">#{{ $index + 1 }}</span>
+                          <div class="category-order-btns">
+                            <button
+                              type="button"
+                              class="btn-icon"
+                              (click)="moveCategory($index, 'up')"
+                              [disabled]="$index === 0"
+                              title="Subir orden"
+                            >
+                              &uarr;
+                            </button>
+                            <button
+                              type="button"
+                              class="btn-icon"
+                              (click)="moveCategory($index, 'down')"
+                              [disabled]="$index === categories().length - 1"
+                              title="Bajar orden"
+                            >
+                              &darr;
+                            </button>
+                          </div>
+                        </div>
+                      </td>
                       <td>
                         <strong>{{ cat.name }}</strong>
                       </td>
@@ -252,7 +278,7 @@
                   }
                   @if (categories().length === 0) {
                     <tr>
-                      <td colspan="7" class="text-center py-4">
+                      <td colspan="8" class="text-center py-4">
                         No hay categorías registradas. Haz clic en "+ Nueva Categoría" para comenzar.
                       </td>
                     </tr>

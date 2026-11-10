@@ -39,6 +39,10 @@ export class CategoryService {
     return this.http.put<Category>(`${this.apiUrl}/${id}`, data);
   }
 
+  reorderCategories(ids: string[]): Observable<{ message: string }> {
+    return this.http.put<{ message: string }>(`${this.apiUrl}/reorder`, { ids });
+  }
+
   deleteCategory(id: string): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
   }

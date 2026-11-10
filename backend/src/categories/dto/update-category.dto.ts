@@ -1,4 +1,4 @@
-import { IsOptional, IsString, MaxLength, IsBoolean, IsIn } from 'class-validator';
+import { IsOptional, IsString, MaxLength, IsBoolean, IsIn, IsNumber } from 'class-validator';
 
 export class UpdateCategoryDto {
   @IsOptional()
@@ -14,6 +14,10 @@ export class UpdateCategoryDto {
   @IsOptional()
   @IsBoolean({ message: 'isActive debe ser un valor booleano' })
   isActive?: boolean;
+
+  @IsOptional()
+  @IsNumber({}, { message: 'El orden debe ser un número' })
+  order?: number;
 
   @IsOptional()
   @IsIn(['Mujer', 'Hombre', 'Ambos'], {

@@ -237,6 +237,14 @@ export class CategoriesService implements OnApplicationBootstrap {
       updates.description = updateCategoryDto.description.trim();
     }
 
+    if (updateCategoryDto.gender !== undefined) {
+      updates.gender = updateCategoryDto.gender;
+    }
+
+    if (updateCategoryDto.order !== undefined) {
+      updates.order = updateCategoryDto.order;
+    }
+
     if (updateCategoryDto.isActive !== undefined) {
       updates.isActive = updateCategoryDto.isActive;
     }
@@ -277,5 +285,21 @@ export class CategoriesService implements OnApplicationBootstrap {
 
     await this.categoryModel.findByIdAndDelete(id).exec();
     return { message: `Categoría "${category.name}" eliminada correctamente` };
+  }
+
+  async reorder(ids: string[]): Promise<{ message: string }> {
+    if (!Array.isArray(ids) || ids.length === 0) {
+      throw new BadRequestException('Se requiere una lista de IDs de categorías');
+    }
+
+    const bulkOps = ids.map((id, index) => ({
+      updateOne: {
+        filter: { _id: id },
+        update: { $set: { order: index + 1 } },
+      },
+    }));
+
+    await this.categoryModel.bulkWrite(bulkOps);
+    return { message: 'Orden de categorías actualizado correctamente' };
   }
 }

@@ -46,6 +46,13 @@ export class CategoriesController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
+  @Put('reorder')
+  async reorder(@Body('ids') ids: string[]) {
+    return this.categoriesService.reorder(ids);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
   @Put(':id')
   async update(
     @Param('id') id: string,
